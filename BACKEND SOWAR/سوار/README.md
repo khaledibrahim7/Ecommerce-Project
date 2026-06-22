@@ -1,118 +1,97 @@
-# Sowar Honey Store Backend
+# مشروع Backend — Sowar Honey Store
 
-Spring Boot backend for the Sowar honey brand.
+هذا المستودع يحتوي على الـ backend لتطبيق متجر عسل "سوار" مبني بـ Spring Boot (Java 17).
 
-## Features
+قائمة التحقق (Checklist)
+- تحديث/إنشاء ملف README هذا (تم)
+- تعليمات التشغيل والبناء محلياً
+- ملاحظات أمان وبيئة (JWT، uploads، CORS)
+- روابط للـ API وSwagger
 
-- Customer register and login.
-- Login by selected identifier type: email or phone.
-- Customer profile with detailed delivery address.
-- Admin and customer roles with JWT authentication.
-- Products with categories, stock quantity, cost, price, and multiple images.
-- Product offers: original crossed price, discounted selling price, and gift-product offers.
-- Cash-on-delivery order flow.
-- Shipping fees by governorate.
-- Admin order management and status updates.
-- Order items keep a snapshot of product price and offer details at purchase time.
-- Customers can view their own orders and order details.
-- Cart flow with saved cart items and checkout.
-- Admins can open any order details at any time.
-- Order status timeline for every order.
-- Wishlist.
-- Product reviews and ratings.
-- Product Q&A.
-- Paged product search with sorting.
-- Structured exception responses with error codes.
-- Manual expenses.
-- Monthly and yearly revenue/profit reports.
+ملخص سريع
+- حزمة الجافا الرئيسية: `com.sowar.store`
+- ملف الدخول (main): `SowarHoneyStoreApplication.java`
+- هيكل معماري متبع: controller → service → repository، DTOs تحت `dto/`، الكيانات تحت `entity/`.
 
-## Run Locally
+المميزات الأساسية
+- تسجيل وتسجيل دخول العملاء (بـ JWT)
+- صلاحيات: عملاء و admins
+- منتجات بفئات، صور متعددة، عروض، وتتبع المخزون
+- سلة مشتريات، طلبات، طريقة دفع عند الاستلام (COD)
+- مراجعات وأسئلة عن المنتج
+- إدارة شحن حسب المحافظات
+- تقارير مالية شهرية وسنوية
 
-1. Create a PostgreSQL database named `sowar_store`.
-2. Update credentials in `src/main/resources/application.yml` if needed.
-3. Run:
+المتطلبات (Prerequisites)
+- Java 17
+- Maven
+- PostgreSQL (قاعدة بيانات)
 
-```bash
+تشغيل المشروع محلياً
+1. جهز قاعدة PostgreSQL وأنشئ قاعدة جديدة (مثال: `sowar_store`) أو استخدم الإعداد الافتراضي في `src/main/resources/application.yml`.
+2. تأكد من ضبط إعدادات الاتصال في `application.yml` أو عبر متغيرات البيئة.
+3. تشغيل في وضع التطوير (يوفر إعادة تحميل للمطورين):
+
+```powershell
 mvn spring-boot:run
 ```
 
-Swagger will be available at:
+أو تجميع ثم تشغيل الـ JAR (PowerShell):
+
+```powershell
+mvn -DskipTests package ; java -jar target/honey-store-0.0.1-SNAPSHOT.jar
+```
+
+مثال تشغيل مع متغيرات بيئة مطلوبة (PowerShell):
+
+```powershell
+$env:SOWAR_MAIL_HOST='smtp.example.com'; $env:app__jwt__secret='your-long-secret-should-be-very-long-and-random'; java -jar target/honey-store-0.0.1-SNAPSHOT.jar
+```
+
+توثيق API (Swagger)
+- بعد التشغيل، واجهة Swagger متاحة عادة على:
 
 ```text
 http://localhost:8080/swagger-ui.html
 ```
 
-## Main API Groups
+ملاحظات تكوين مهمة
+- مفتاح JWT: الخاصية `app.jwt.secret` يجب أن تكون طويلة وعشوائية لأنها تُستخدم لإنشاء HMAC key. إذا كانت قصيرة سيخفق التوقيع.
+- مجلد رفع الملفات: `app.upload-dir` (افتراضي `uploads/`). الملفات المرفوعة تُخزن وتُخدم عبر `StaticResourceConfig` على المسار `/uploads/**`.
+- CORS: السماح لمواقع التطوير مثل `http://localhost:4200` مُعد في `config/CorsConfig.java`.
+- الانتباه: في `application.yml` الخاص بالمشروع قيمة `spring.jpa.hibernate.ddl-auto` مُعطاة كـ `drop-and-create` — هذا سيحذف ويُعيد إنشاء الجداول عند كل تشغيل. لا تستخدم على قواعد بيانات إنتاجية.
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `GET /api/me`
-- `PUT /api/me`
-- `GET /api/products`
-- `GET /api/products/page?q=&categoryId=&featured=&page=0&size=12&sort=featured`
-- `GET /api/products/{productId}/reviews`
-- `POST /api/products/{productId}/reviews`
-- `GET /api/products/{productId}/questions`
-- `POST /api/products/{productId}/questions`
-- `GET /api/categories`
-- `GET /api/shipping-governorates`
-- `POST /api/orders`
-- `POST /api/orders/checkout`
-- `GET /api/orders/my`
-- `GET /api/orders/{id}`
-- `GET /api/cart`
-- `POST /api/cart/items`
-- `DELETE /api/cart/items/{productId}`
-- `GET /api/wishlist`
-- `POST /api/wishlist/{productId}`
-- `DELETE /api/wishlist/{productId}`
-- `POST /api/admin/products`
-- `POST /api/admin/categories`
-- `PUT /api/admin/categories/{id}`
-- `DELETE /api/admin/categories/{id}`
-- `POST /api/admin/shipping-governorates`
-- `PUT /api/admin/shipping-governorates/{id}`
-- `DELETE /api/admin/shipping-governorates/{id}`
-- `GET /api/admin/orders`
-- `GET /api/admin/orders/{id}`
-- `PUT /api/admin/orders/{id}/status`
-- `DELETE /api/admin/reviews/{id}`
-- `PUT /api/admin/questions/{id}/answer`
-- `POST /api/admin/finance/expenses`
-- `PUT /api/admin/finance/expenses/{id}`
-- `DELETE /api/admin/finance/expenses/{id}`
-- `GET /api/admin/finance/reports/monthly/{year}/{month}`
-- `GET /api/admin/finance/reports/yearly/{year}`
+أمن وصلاحيات
+- نقاط الدخول العامة: `/api/auth/**`, `/uploads/**`, وواجهة Swagger.
+- بعض GETs للمنتجات والفئات مُسموح بها للمجهولين (انظر `SecurityConfig.java`).
+- مسارات الإدارة تحت `/api/admin/**` تتطلب دور `ADMIN`.
+- الخدمة المسؤولة عن JWT: `security/JwtService.java`.
 
-## Register Example
+نقاط بداية مفيدة (أمثلة سريعة)
+- تسجيل مستخدم: `POST /api/auth/register`
+- تسجيل دخول: `POST /api/auth/login`
+- الحصول على منتجات (مباشر): `GET /api/products`
+- صفحة منتجات مفصّلة: `GET /api/products/page` (دعم البحث والفرز والصفحات)
+- إنشاء طلب: `POST /api/orders`
+- صفحات الإدارة (منتجات/فئات/طلبات): تحت `/api/admin/**`
 
-```json
-{
-  "fullName": "Mahmoud Omar",
-  "phone": "01012345678",
-  "email": "mahmoud@example.com",
-  "password": "12345678",
-  "address": {
-    "governorateId": 1,
-    "city": "Nasr City",
-    "area": "Abbas El Akkad",
-    "street": "Main Street",
-    "buildingNumber": "12",
-    "floor": "3",
-    "apartment": "7",
-    "landmark": "Near the pharmacy",
-    "addressType": "HOME",
-    "deliveryNotes": "Call before arrival"
-  }
-}
-```
+البنية والملفات المهمة
+- `src/main/java/com/sowar/store/controller` — Controllers (APIs)
+- `src/main/java/com/sowar/store/service` — Business logic
+- `src/main/java/com/sowar/store/repository` — Spring Data repositories
+- `src/main/resources/application.yml` — إعدادات البيئة (DB, JWT, upload-dir, admin defaults)
+- `config/AdminSeeder` — يقوم بإنشاء مستخدم أدمن عند التشغيل إن لم يكن موجودًا (مفيد للتطوير المحلي)
 
-## Login Example
+نصائح عند التطوير
+- لا تقم بتغيير `application.yml` في البيئات الحية بدون مراجعة بسبب خيار `ddl-auto`.
+- لا تُخزن أسرار (مثل `app.jwt.secret`) في المستودع؛ استخدم متغيرات البيئة لإعدادها في الإنتاج.
+- عند الحاجة للتعامل مع الملفات المرفوعة، استخدم القيمة من `@Value("${app.upload-dir}")` بدلاً من hard-code.
 
-```json
-{
-  "loginType": "PHONE",
-  "identifier": "01012345678",
-  "password": "12345678"
-}
-```
+دعم وملاحظات
+- يحتوي المشروع على معالجات أخطاء مركزية في `common/GlobalExceptionHandler.java` ويستخدم أصناف `ApiException` و`ErrorCode` لردود منظمة عند الأخطاء.
+- إن احتجت مساعدة إضافية أو تعديل README بلغني بما تريد تشديده (مثال: شرح إعداد البريد، خطوات اختبارات أو CI/CD).
+
+الترخيص
+- (اكتب هنا نوع الترخيص إن وُجد أو اترك هذا الجزء لمالك المشروع)
+
+شكراً — بالتوفيق في التطوير!
