@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: sowar-honey-store
+  mail:
+    host: ${SOWAR_MAIL_HOST:}
+    port: ${SOWAR_MAIL_PORT:587}
+    username: ${SOWAR_MAIL_USERNAME:}
+    password: ${SOWAR_MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SOWAR_MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${SOWAR_MAIL_STARTTLS_ENABLE:true}
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Sowar
+    username: postgres
+    password: 123456789
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: "change-this-secret-to-a-long-random-production-secret-change-this"
+    expiration-minutes: 1440
+  upload-dir: uploads
+  notifications:
+    low-stock-email-to: ${SOWAR_LOW_STOCK_EMAIL_TO:${SOWAR_ADMIN_EMAIL:khaled@gmail.com}}
+  admin:
+    full-name: ${SOWAR_ADMIN_FULL_NAME:Sowar Admin}
+    phone: ${SOWAR_ADMIN_PHONE:01110853581}
+    email: ${SOWAR_ADMIN_EMAIL:khaled@gmail.com}
+    password: ${SOWAR_ADMIN_PASSWORD:Admin12345}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

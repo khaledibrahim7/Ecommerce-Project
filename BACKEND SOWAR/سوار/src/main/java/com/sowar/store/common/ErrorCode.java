@@ -1,0 +1,13 @@
+package com.sowar.store.common;
+
+public enum ErrorCode {
+    VALIDATION_FAILED,
+    RESOURCE_NOT_FOUND,
+    DUPLICATE_RESOURCE,
+    UNAUTHORIZED,
+    FORBIDDEN,
+    INVALID_REQUEST,
+    INSUFFICIENT_STOCK,
+    FILE_UPLOAD_FAILED,
+    INTERNAL_ERROR
+}
