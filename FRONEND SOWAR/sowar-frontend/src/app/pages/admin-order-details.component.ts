@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
@@ -7,64 +7,68 @@ import { Order } from '../core/models';
 import { ToastService } from '../core/toast.service';
 
 @Component({
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule, RouterLink],
   template: `
     @if (order(); as o) {
       <section class="page">
         <div class="section-title">
           <div>
-            <h1>تفاصيل طلب #{{ o.id }}</h1>
+            <h1>Order Details #{{ o.id }}</h1>
             <p class="muted">{{ o.customerName }} - {{ o.customerPhone }}</p>
           </div>
-          <span class="status-badge {{ o.status }}">{{ o.status }}</span>
+          <div class="order-actions">
+            <a class="btn secondary" [routerLink]="['/admin/orders', o.id, 'receipt']">Print Cashier Receipt</a>
+            <span class="status-badge {{ o.status }}">{{ statusLabel(o.status) }}</span>
+          </div>
         </div>
 
         <div class="layout">
           <section class="card box">
-            <h2>تغيير الحالة</h2>
-            <select [(ngModel)]="status">
-              <option value="PLACED">PLACED</option>
-              <option value="CONTACTING_CUSTOMER">CONTACTING_CUSTOMER</option>
-              <option value="CONFIRMED">CONFIRMED</option>
-              <option value="SHIPPING">SHIPPING</option>
-              <option value="DELIVERED">DELIVERED</option>
-              <option value="CANCELLED">CANCELLED</option>
+            <h2>Change Status</h2>
+            <select [(ngModel)]="status" [disabled]="isFinalStatus(o.status)">
+              <option [value]="o.status">{{ statusLabel(o.status) }}</option>
+              @for (next of nextStatuses(o.status); track next) {
+                <option [value]="next">{{ statusLabel(next) }}</option>
+              }
             </select>
-            <textarea [(ngModel)]="note" placeholder="ملاحظة تظهر في تاريخ الطلب"></textarea>
-            <button class="btn" (click)="update(o.id)">حفظ الحالة</button>
+            <textarea [(ngModel)]="note" placeholder="Note to appear in order history"></textarea>
+            <button class="btn" [disabled]="isFinalStatus(o.status) || status === o.status" (click)="update(o.id)">Save Status</button>
+            @if (isFinalStatus(o.status)) {
+              <p class="muted">This order status is final and cannot be changed.</p>
+            }
           </section>
 
           <section class="card box">
-            <h2>العنوان</h2>
+            <h2>Address</h2>
             <p>{{ o.address }}</p>
             <p class="muted">{{ o.governorate }}</p>
           </section>
         </div>
 
         <section class="card box">
-          <h2>المنتجات</h2>
+          <h2>Products</h2>
           @for (item of o.items; track item.productId) {
             <div class="line">
               <span>{{ item.productName }} × {{ item.quantity }}</span>
-              <strong>{{ item.lineTotal }} ج.م</strong>
+              <strong>{{ item.lineTotal }} EGP</strong>
             </div>
           }
-          <div class="line"><span>الشحن</span><strong>{{ o.shippingFee }} ج.م</strong></div>
-          <div class="line total"><span>الإجمالي</span><strong>{{ o.total }} ج.م</strong></div>
+          <div class="line"><span>Shipping</span><strong>{{ o.shippingFee }} EGP</strong></div>
+          <div class="line total"><span>Total</span><strong>{{ o.total }} EGP</strong></div>
         </section>
 
         <section class="card box">
-          <h2>تاريخ الحالة</h2>
+          <h2>Status History</h2>
           @for (history of o.statusHistory; track history.createdAt) {
             <p><strong>{{ history.status }}</strong> - {{ history.note }} - {{ history.createdAt | date:'short' }}</p>
           } @empty {
-            <p class="muted">لا يوجد تاريخ بعد.</p>
+            <p class="muted">No history yet.</p>
           }
         </section>
       </section>
     }
   `,
-  styles: [`.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{padding:18px;margin-bottom:16px;display:grid;gap:10px}.line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eadfca}.total{font-size:1.2rem}@media(max-width:800px){.layout{grid-template-columns:1fr}}`]
+  styles: [`.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{padding:18px;margin-bottom:16px;display:grid;gap:10px}.line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eadfca}.total{font-size:1.2rem}.order-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}@media(max-width:800px){.layout{grid-template-columns:1fr}}`]
 })
 export class AdminOrderDetailsComponent implements OnInit {
   order = signal<Order | null>(null);
@@ -84,10 +88,39 @@ export class AdminOrderDetailsComponent implements OnInit {
   }
 
   update(id: number) {
+    if (this.order()?.status === this.status) return;
     this.api.updateOrderStatus(id, this.status, this.note).subscribe(() => {
-      this.toast.success('تم تحديث حالة الطلب');
+      this.toast.success('Order status updated');
       this.note = '';
       this.load();
-    });
+    }, () => this.toast.error('Order status cannot be changed this way'));
+  }
+
+  statusLabel(status: string) {
+    const labels: Record<string, string> = {
+      PLACED: 'تم الطلب',
+      CONTACTING_CUSTOMER: 'جاري التواصل',
+      CONFIRMED: 'تم التأكيد',
+      SHIPPING: 'قيد الشحن',
+      DELIVERED: 'تم التسليم',
+      CANCELLED: 'ملغي'
+    };
+    return labels[status] || status;
+  }
+
+  isFinalStatus(status: string) {
+    return status === 'DELIVERED' || status === 'CANCELLED';
+  }
+
+  nextStatuses(status: string) {
+    const flow: Record<string, string[]> = {
+      PLACED: ['CONTACTING_CUSTOMER', 'CONFIRMED', 'CANCELLED'],
+      CONTACTING_CUSTOMER: ['CONFIRMED', 'CANCELLED'],
+      CONFIRMED: ['SHIPPING', 'CANCELLED'],
+      SHIPPING: ['DELIVERED', 'CANCELLED'],
+      DELIVERED: [],
+      CANCELLED: []
+    };
+    return flow[status] || [];
   }
 }

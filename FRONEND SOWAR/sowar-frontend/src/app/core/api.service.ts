@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AddressRequest, AuthResponse, Cart, Category, CheckoutResponse, Expense, LoginType, Order, PageResponse, Product, Question, Report, Review, ShippingGovernorate, UserProfile } from './models';
+import { AddressRequest, AppNotification, AuthResponse, Cart, Category, CheckoutResponse, ContactLink, ElectronicInvoice, Expense, LoginType, Order, PageResponse, Product, Question, Report, Review, ShippingGovernorate, UserProfile } from './models';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -202,9 +202,51 @@ export class ApiService {
     return this.http.delete<void>(`${API_URL}/admin/finance/expenses/${id}`);
   }
 
+  adminInvoices() {
+    return this.http.get<ElectronicInvoice[]>(`${API_URL}/admin/invoices`);
+  }
+
+  adminInvoiceByOrder(orderId: number) {
+    return this.http.get<ElectronicInvoice>(`${API_URL}/admin/invoices/orders/${orderId}`);
+  }
+
+  contactLinks() {
+    return this.http.get<ContactLink[]>(`${API_URL}/contact-links`);
+  }
+
+  adminContactLinks() {
+    return this.http.get<ContactLink[]>(`${API_URL}/admin/contact-links`);
+  }
+
+  saveContactLink(link: Partial<ContactLink>) {
+    return link.id
+      ? this.http.put<ContactLink>(`${API_URL}/admin/contact-links/${link.id}`, link)
+      : this.http.post<ContactLink>(`${API_URL}/admin/contact-links`, link);
+  }
+
+  deleteContactLink(id: number) {
+    return this.http.delete<void>(`${API_URL}/admin/contact-links/${id}`);
+  }
+
   uploadImage(file: File) {
     const data = new FormData();
     data.append('file', file);
     return this.http.post<{ url: string; fileName: string }>(`${API_URL}/admin/uploads/images`, data);
+  }
+
+  notifications() {
+    return this.http.get<AppNotification[]>(`${API_URL}/notifications`);
+  }
+
+  unreadNotificationsCount() {
+    return this.http.get<{ count: number }>(`${API_URL}/notifications/unread-count`);
+  }
+
+  markNotificationRead(id: number) {
+    return this.http.put<void>(`${API_URL}/notifications/${id}/read`, {});
+  }
+
+  markAllNotificationsRead() {
+    return this.http.put<void>(`${API_URL}/notifications/read-all`, {});
   }
 }

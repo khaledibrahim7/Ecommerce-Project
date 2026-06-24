@@ -61,6 +61,8 @@ export interface Product {
   sortOrder: number;
   price: number;
   originalPrice?: number;
+  // percentage value like 15 for 15% discount. Optional, admin-friendly field.
+  discountPercent?: number;
   hasDiscount: boolean;
   cost?: number;
   promotionType: PromotionType;
@@ -183,4 +185,41 @@ export interface Expense {
   description?: string;
   amount: number;
   expenseDate: string;
+}
+
+export type ElectronicInvoiceStatus = 'PENDING_CONFIGURATION' | 'PENDING_SUBMISSION' | 'SUBMITTED' | 'FAILED';
+
+export interface ElectronicInvoice {
+  id: number;
+  orderId: number;
+  invoiceNumber: string;
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  status: ElectronicInvoiceStatus;
+  portalReference?: string;
+  errorMessage?: string;
+  submittedAt?: string;
+  createdAt: string;
+}
+
+export interface ContactLink {
+  id?: number;
+  label: string;
+  platform: string;
+  value: string;
+  active: boolean;
+  sortOrder: number;
+}
+
+export type NotificationType = 'NEW_ORDER' | 'ORDER_STATUS_CHANGED' | 'NEW_QUESTION' | 'QUESTION_ANSWERED' | 'LOW_STOCK';
+
+export interface AppNotification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  targetUrl?: string;
+  read: boolean;
+  createdAt: string;
 }

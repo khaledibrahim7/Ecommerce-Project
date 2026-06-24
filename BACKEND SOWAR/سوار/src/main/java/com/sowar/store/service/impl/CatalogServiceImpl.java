@@ -5,12 +5,15 @@ package com.sowar.store.service.impl;
 
 import com.sowar.store.dto.*;
 import com.sowar.store.entity.*;
+import com.sowar.store.entity.enums.NotificationType;
 import com.sowar.store.entity.enums.PromotionType;
 import com.sowar.store.repository.*;
 import com.sowar.store.common.ApiException;
 import com.sowar.store.common.NotFoundException;
+import com.sowar.store.service.AppEmailService;
 import com.sowar.store.service.CatalogService;
 import com.sowar.store.service.LowStockNotificationService;
+import com.sowar.store.service.NotificationService;
 import com.sowar.store.service.promotion.PromotionStrategyFactory;
 import com.sowar.store.mapper.ProductMapper;
 import com.sowar.store.mapper.CategoryMapper;
@@ -40,6 +43,8 @@ public class CatalogServiceImpl implements CatalogService {
     private final ProductMapper productMapper;
     private final CategoryMapper categoryMapper;
     private final QuestionMapper questionMapper;
+    private final NotificationService notificationService;
+    private final AppEmailService appEmailService;
 
 
     @Transactional(readOnly = true)
@@ -156,7 +161,9 @@ public class CatalogServiceImpl implements CatalogService {
         question.setProduct(product);
         question.setCustomer(customer);
         question.setQuestion(request.question());
-        return questionMapper.toResponse(productQuestionRepository.save(question));
+        ProductQuestion savedQuestion = productQuestionRepository.save(question);
+        notifyAdminsAboutQuestion(savedQuestion);
+        return questionMapper.toResponse(savedQuestion);
     }
 
     @Transactional
@@ -165,7 +172,47 @@ public class CatalogServiceImpl implements CatalogService {
                 .orElseThrow(() -> new NotFoundException("Question not found"));
         question.setAnswer(request.answer());
         question.setAnswered(true);
+        notifyCustomerAboutQuestionAnswer(question);
         return questionMapper.toResponse(question);
+    }
+
+    private void notifyAdminsAboutQuestion(ProductQuestion question) {
+        String title = "سؤال جديد عن " + question.getProduct().getName();
+        String message = question.getCustomer().getFullName() + " سأل: " + question.getQuestion();
+        String targetUrl = "/admin";
+        notificationService.notifyAdmins(NotificationType.NEW_QUESTION, title, message, targetUrl);
+        appEmailService.sendAdminMail(title, """
+                مرحبا،
+
+                وصل سؤال جديد على متجر سوار.
+
+                المنتج: %s
+                العميل: %s
+                السؤال: %s
+
+                برجاء الرد من لوحة التحكم.
+                """.formatted(question.getProduct().getName(), question.getCustomer().getFullName(), question.getQuestion()));
+    }
+
+    private void notifyCustomerAboutQuestionAnswer(ProductQuestion question) {
+        User customer = question.getCustomer();
+        if (customer == null) {
+            return;
+        }
+        String title = "تم الرد على سؤالك";
+        String message = "تم الرد على سؤالك عن " + question.getProduct().getName() + ": " + question.getAnswer();
+        String targetUrl = "/products/" + question.getProduct().getId();
+        notificationService.notifyUser(customer, NotificationType.QUESTION_ANSWERED, title, message, targetUrl);
+        appEmailService.send(customer.getEmail(), title, """
+                مرحبا %s،
+
+                تم الرد على سؤالك عن منتج: %s
+
+                السؤال: %s
+                الرد: %s
+
+                شكرا لتواصلك مع سوار.
+                """.formatted(customer.getFullName(), question.getProduct().getName(), question.getQuestion(), question.getAnswer()));
     }
 
     @Transactional

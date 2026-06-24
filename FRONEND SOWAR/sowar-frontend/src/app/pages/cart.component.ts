@@ -6,55 +6,8 @@ import { ToastService } from '../core/toast.service';
 
 @Component({
   imports: [RouterLink],
-  template: `
-    <section class="page">
-      <div class="section-title">
-        <h1>السلة</h1>
-        <button class="btn secondary" type="button" (click)="clear()" [disabled]="!cart()?.items?.length">تفريغ السلة</button>
-      </div>
-
-      @if (cart(); as c) {
-        <div class="layout">
-          <div class="card">
-            <table>
-              <thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th><th></th></tr></thead>
-              <tbody>
-                @for (item of c.items; track item.productId) {
-                  <tr>
-                    <td><a [routerLink]="['/products', item.productId]">{{ item.productName }}</a></td>
-                    <td><input type="number" min="1" [value]="item.quantity" (change)="update(item.productId, $any($event.target).value)"></td>
-                    <td>{{ money(item.unitPrice) }}</td>
-                    <td>{{ money(item.lineTotal) }}</td>
-                    <td><button class="btn danger" (click)="remove(item.productId)">حذف</button></td>
-                  </tr>
-                } @empty {
-                  <tr><td colspan="5">السلة فارغة.</td></tr>
-                }
-              </tbody>
-            </table>
-          </div>
-
-          <aside class="card summary">
-            <h2>ملخص السلة</h2>
-            <p class="muted">راجع المنتجات والكميات، وبعدها انتقل لتأكيد العنوان والدفع كاش عند الاستلام.</p>
-            <div class="line"><span>إجمالي المنتجات</span><strong>{{ money(c.subtotal) }}</strong></div>
-            <button class="btn" [disabled]="!c.items.length" routerLink="/checkout">تأكيد الطلب</button>
-          </aside>
-        </div>
-      }
-    </section>
-  `,
-  styles: [`
-    .layout{display:grid;grid-template-columns:1fr 360px;gap:16px}
-    .summary{padding:18px;display:grid;gap:12px;align-content:start}
-    .address-box{padding:12px;border:1px solid #eadfca;border-radius:8px;background:#fffaf2}
-    .address-box p{margin:8px 0;color:#4a3420;line-height:1.8}
-    .address-box a{color:#8a4f00;font-weight:800;text-decoration:none}
-    .line{display:flex;justify-content:space-between}
-    td input{width:80px}
-    textarea{min-height:92px}
-    @media(max-width:900px){.layout{grid-template-columns:1fr}}
-  `]
+  templateUrl: './cart.component.html',
+  styleUrls: ['./cart.component.scss']
 })
 export class CartComponent implements OnInit {
   cart = signal<Cart | null>(null);
@@ -69,29 +22,48 @@ export class CartComponent implements OnInit {
     this.api.cart().subscribe(cart => this.cart.set(cart));
   }
 
-  update(productId: number, quantity: string) {
-    this.api.saveCartItem(productId, Number(quantity)).subscribe(cart => {
+  update(productId: number, quantity: string | number) {
+    const numQuantity = Number(quantity);
+    if (numQuantity < 1) {
+      this.remove(productId);
+      return;
+    }
+    this.api.saveCartItem(productId, numQuantity).subscribe(cart => {
       this.cart.set(cart);
-      this.toast.success('تم تحديث الكمية');
+      this.toast.success('Quantity updated');
     });
   }
 
   remove(productId: number) {
     this.api.removeCartItem(productId).subscribe(() => {
-      this.toast.success('تم حذف المنتج من السلة');
+      this.toast.success('Product removed from cart');
       this.load();
     });
   }
 
   clear() {
-    if (!confirm('تفريغ السلة؟')) return;
+    if (!confirm('Are you sure you want to clear the cart?')) return;
     this.api.clearCart().subscribe(() => {
-      this.toast.success('تم تفريغ السلة');
+      this.toast.success('Cart cleared');
       this.load();
     });
   }
 
   money(value?: number | null) {
-    return `${value || 0} ج.م`;
+    return `${value || 0} EGP`;
+  }
+
+  imageUrl(url: string | null | undefined): string {
+    if (!url) {
+      return 'https://via.placeholder.com/100';
+    }
+    if (url.startsWith('http')) {
+      return url;
+    }
+    if (url.startsWith('/')) {
+      const baseUrl = 'http://localhost:8080';
+      return `${baseUrl}${url}`;
+    }
+    return 'https://via.placeholder.com/100';
   }
 }

@@ -11,76 +11,77 @@ import { ToastService } from '../core/toast.service';
     <section class="page admin-products">
       <div class="section-title">
         <div>
-          <h1>إدارة المنتجات</h1>
-          <p class="muted">إضافة وتعديل المنتجات والصور والعروض من صفحة مستقلة.</p>
+          <h1>Product Management</h1>
+          <p class="muted">Add and edit products, images, and offers from a dedicated page.</p>
         </div>
         <div class="actions-row">
-          <a class="btn secondary" routerLink="/admin">لوحة التحكم</a>
-          <a class="btn" routerLink="/products">معاينة المتجر</a>
+          <a class="btn secondary" routerLink="/admin">Dashboard</a>
+          <a class="btn" routerLink="/products">Preview Store</a>
         </div>
       </div>
 
       <section class="card panel">
-        <h2>{{ productForm.id ? 'تعديل منتج' : 'إضافة منتج' }}</h2>
-        <h3>البيانات الأساسية</h3>
+        <h2>{{ productForm.id ? 'Edit Product' : 'Add Product' }}</h2>
+        <h3>Basic Information</h3>
         <div class="form-grid">
-          <label>اسم المنتج <input [(ngModel)]="productForm.name"></label>
-          <label>التصنيف
+          <label>Product Name <input [(ngModel)]="productForm.name"></label>
+          <label>Category
             <select [(ngModel)]="productForm.categoryId">
-              <option [ngValue]="undefined">اختر التصنيف</option>
+              <option [ngValue]="undefined">Select Category</option>
               @for (category of categories(); track category.id) {
                 <option [ngValue]="category.id">{{ category.name }}</option>
               }
             </select>
           </label>
-          <label>السعر الحالي <input type="number" [(ngModel)]="productForm.price"></label>
-          <label>التكلفة <input type="number" [(ngModel)]="productForm.cost"></label>
-          <label>الاستوك <input type="number" [(ngModel)]="productForm.stockQuantity"></label>
-          <label>حد الاستوك المنخفض <input type="number" [(ngModel)]="productForm.lowStockThreshold"></label>
-          <label>الوزن <input [(ngModel)]="productForm.weight"></label>
-          <label>المصدر <input [(ngModel)]="productForm.origin"></label>
-          <label class="check"><input type="checkbox" [(ngModel)]="productForm.featured"> مميز في الرئيسية</label>
-          <label class="check"><input type="checkbox" [(ngModel)]="productForm.active"> ظاهر للعملاء</label>
-          <label class="full">الوصف <textarea [(ngModel)]="productForm.description"></textarea></label>
-          <label class="full">المكونات <textarea [(ngModel)]="productForm.ingredients"></textarea></label>
-          <label class="full">طريقة الاستخدام <textarea [(ngModel)]="productForm.usageInstructions"></textarea></label>
-          <label class="full">طريقة التخزين <textarea [(ngModel)]="productForm.storageInstructions"></textarea></label>
+          <label>Price for Customer <input type="number" [(ngModel)]="productForm.price" (ngModelChange)="onPriceChange()"></label>
+          <label>Product Cost <input type="number" [(ngModel)]="productForm.cost"></label>
+          <label>Stock <input type="number" [(ngModel)]="productForm.stockQuantity"></label>
+          <label>Low Stock Threshold <input type="number" [(ngModel)]="productForm.lowStockThreshold"></label>
+          <label>Weight <input [(ngModel)]="productForm.weight"></label>
+          <label>Origin <input [(ngModel)]="productForm.origin"></label>
+          <label class="check"><input type="checkbox" [(ngModel)]="productForm.featured"> Featured on Homepage</label>
+          <label class="check"><input type="checkbox" [(ngModel)]="productForm.active"> Visible to Customers</label>
+          <label class="full">Description <textarea [(ngModel)]="productForm.description"></textarea></label>
+          <label class="full">Ingredients <textarea [(ngModel)]="productForm.ingredients"></textarea></label>
+          <label class="full">Usage Instructions <textarea [(ngModel)]="productForm.usageInstructions"></textarea></label>
+          <label class="full">Storage Instructions <textarea [(ngModel)]="productForm.storageInstructions"></textarea></label>
         </div>
 
-        <h3>الصور</h3>
+        <h3>Images</h3>
         <label class="upload-box">
-          إضافة صور للمنتج
+          Add product images
           <input type="file" accept="image/*" multiple (change)="uploadProductImages($event)">
         </label>
         @if ((productForm.imageUrls || []).length) {
           <div class="image-list">
             @for (image of productForm.imageUrls; track image) {
               <div class="image-chip">
-                <img [src]="imageUrl(image)" alt="صورة المنتج">
-                <button class="btn danger" type="button" (click)="removeImage(image)">حذف</button>
+                <img [src]="imageUrl(image)" alt="Product Image">
+                <button class="btn danger" type="button" (click)="removeImage(image)">Delete</button>
               </div>
             }
           </div>
         }
 
-        <h3>العرض</h3>
+        <h3>Offer</h3>
         <div class="form-grid">
-          <label>نوع العرض
+          <label>Offer Type
             <select [(ngModel)]="productForm.promotionType" (ngModelChange)="onPromotionChange()">
-              <option value="NONE">بدون عرض</option>
-              <option value="DISCOUNT">خصم على السعر</option>
-              <option value="GIFT_PRODUCT">منتج هدية</option>
+              <option value="NONE">No Offer</option>
+              <option value="DISCOUNT">Price Discount</option>
+              <option value="GIFT_PRODUCT">Gift Product</option>
             </select>
           </label>
-          @if (productForm.promotionType === 'DISCOUNT') {
-            <label>السعر قبل الخصم <input type="number" [(ngModel)]="productForm.originalPrice"></label>
-            <label>عنوان العرض <input [(ngModel)]="productForm.promotionTitle" placeholder="مثال: خصم 15%"></label>
-            <label class="full">وصف العرض <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
-          }
+           @if (productForm.promotionType === 'DISCOUNT') {
+             <label>Price Before Discount <input type="number" [(ngModel)]="productForm.originalPrice" (ngModelChange)="onOriginalPriceChange()"></label>
+             <label>Discount Percent % <input type="number" min="0" max="100" [(ngModel)]="productForm.discountPercent" (ngModelChange)="onDiscountPercentChange()" placeholder="e.g., 15"></label>
+             <label>Offer Title <input [(ngModel)]="productForm.promotionTitle" placeholder="e.g., 15% Off"></label>
+             <label class="full">Offer Description <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
+           }
           @if (productForm.promotionType === 'GIFT_PRODUCT') {
-            <label>المنتج الهدية
+            <label>Gift Product
               <select [(ngModel)]="productForm.giftProductId">
-                <option [ngValue]="undefined">اختر المنتج الهدية</option>
+                <option [ngValue]="undefined">Select Gift Product</option>
                 @for (product of products(); track product.id) {
                   @if (product.id !== productForm.id) {
                     <option [ngValue]="product.id">{{ product.name }}</option>
@@ -88,44 +89,47 @@ import { ToastService } from '../core/toast.service';
                 }
               </select>
             </label>
-            <label>كمية الهدية <input type="number" min="1" [(ngModel)]="productForm.giftQuantity"></label>
-            <label>عنوان العرض <input [(ngModel)]="productForm.promotionTitle" placeholder="مثال: اشتري واحصل على هدية"></label>
-            <label class="full">وصف العرض <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
+            <label>Gift Quantity <input type="number" min="1" [(ngModel)]="productForm.giftQuantity"></label>
+            <label>Offer Title <input [(ngModel)]="productForm.promotionTitle" placeholder="e.g., Buy One Get One Free"></label>
+            <label class="full">Offer Description <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
           }
         </div>
 
         <div class="actions-row">
-          <button class="btn" (click)="saveProduct()">حفظ المنتج</button>
-          <button class="btn secondary" (click)="resetProduct()">{{ productForm.id ? 'إلغاء التعديل' : 'منتج جديد' }}</button>
+          <button class="btn" (click)="saveProduct()">Save Product</button>
+          <button class="btn secondary" (click)="resetProduct()">{{ productForm.id ? 'Cancel Edit' : 'New Product' }}</button>
         </div>
       </section>
 
       <section class="card panel">
-        <h2>قائمة المنتجات</h2>
-        <table>
-          <thead><tr><th>المنتج</th><th>التصنيف</th><th>السعر</th><th>العرض</th><th>الاستوك</th><th>الحالة</th><th></th></tr></thead>
-          <tbody>
-            @for (product of products(); track product.id) {
-              <tr>
-                <td>{{ product.name }}</td>
-                <td>{{ product.categoryName || '-' }}</td>
-                <td>
-                  @if (showOldPrice(product)) { <span class="old-price">{{ money(product.originalPrice) }}</span> }
+        <h2>Product List</h2>
+        <div class="product-grid">
+          @for (product of products(); track product.id) {
+            <div class="product-card">
+              <img [src]="imageUrl(product.imageUrls?.[0] || '')" alt="{{ product.name }}" class="product-image">
+              <div class="product-info">
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.categoryName || '-' }}</p>
+                <div class="prices">
+                  @if (showOldPrice(product)) {
+                    <span class="old-price">{{ money(product.originalPrice) }}</span>
+                  }
                   <strong>{{ money(product.price) }}</strong>
-                </td>
-                <td>{{ offerLabel(product) }}</td>
-                <td>{{ product.stockQuantity }}</td>
-                <td><span class="pill" [class.warn]="product.lowStock">{{ product.active ? 'ظاهر' : 'متوقف' }}</span></td>
-                <td>
-                  <button class="btn secondary" (click)="edit(product)">تعديل</button>
-                  <button class="btn danger" (click)="deleteProduct(product.id)">تعطيل</button>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="7">لا توجد منتجات.</td></tr>
-            }
-          </tbody>
-        </table>
+                </div>
+                <p>Cost: {{ money(product.cost) }}</p>
+                <p>Stock: {{ product.stockQuantity }}</p>
+                <p>Offer: {{ offerLabel(product) }}</p>
+                <p>Status: <span class="pill" [class.warn]="product.lowStock">{{ product.active ? 'Visible' : 'Disabled' }}</span></p>
+              </div>
+              <div class="product-actions">
+                <button class="btn secondary" (click)="edit(product)">Edit</button>
+                <button class="btn danger" (click)="deleteProduct(product.id)">Disable</button>
+              </div>
+            </div>
+          } @empty {
+            <p>No products found.</p>
+          }
+        </div>
       </section>
     </section>
   `,
@@ -141,7 +145,54 @@ import { ToastService } from '../core/toast.service';
     .image-chip img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
     .pill { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: #dcfce7; color: #166534; font-weight: 800; }
     .pill.warn { background: #fef3c7; color: #92400e; }
-    td .btn { margin-inline-start: 6px; }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .product-card {
+      border: 1px solid #eadfca;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+    }
+    .product-image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .product-info {
+      flex-grow: 1;
+    }
+    .product-info h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+    .product-info p {
+      margin: 4px 0;
+      color: #555;
+    }
+    .prices {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      font-size: 1.1rem;
+    }
+    .old-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 0.9rem;
+    }
+    .product-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+    }
   `]
 })
 export class AdminProductsComponent implements OnInit {
@@ -162,7 +213,7 @@ export class AdminProductsComponent implements OnInit {
 
   saveProduct() {
     this.api.saveProduct(this.prepareProductPayload()).subscribe(() => {
-      this.toast.success('تم حفظ المنتج');
+      this.toast.success('Product saved');
       this.resetProduct();
       this.load();
     });
@@ -173,7 +224,7 @@ export class AdminProductsComponent implements OnInit {
     files.forEach(file => {
       this.api.uploadImage(file).subscribe(result => {
         this.productForm.imageUrls = [...(this.productForm.imageUrls || []), result.url];
-        this.toast.success('تم رفع الصورة');
+        this.toast.success('Image uploaded');
       });
     });
     (event.target as HTMLInputElement).value = '';
@@ -190,6 +241,7 @@ export class AdminProductsComponent implements OnInit {
       this.productForm.promotionDescription = '';
       this.productForm.giftProductId = undefined;
       this.productForm.giftQuantity = undefined;
+      this.productForm.discountPercent = undefined;
     }
     if (this.productForm.promotionType === 'DISCOUNT') {
       this.productForm.giftProductId = undefined;
@@ -200,15 +252,47 @@ export class AdminProductsComponent implements OnInit {
     }
   }
 
+  // when admin edits the original (pre-discount) price, recalculate the displayed price if discountPercent exists
+  onOriginalPriceChange() {
+    const op = Number(this.productForm.originalPrice || 0);
+    const pct = Number(this.productForm.discountPercent || 0);
+    if (op > 0 && pct > 0) {
+      const discounted = Math.round(op * (1 - pct / 100));
+      this.productForm.price = discounted;
+    }
+  }
+
+  // when admin edits the discount percent, recalc price/originalPrice to stay consistent
+  onDiscountPercentChange() {
+    const pct = Number(this.productForm.discountPercent || 0);
+    const op = Number(this.productForm.originalPrice || 0);
+    const p = Number(this.productForm.price || 0);
+    if (op > 0 && pct > 0) {
+      this.productForm.price = Math.round(op * (1 - pct / 100));
+    } else if (p > 0 && pct > 0) {
+      // if originalPrice missing but price exists, compute originalPrice from price
+      this.productForm.originalPrice = Math.round(p / (1 - pct / 100));
+    }
+  }
+
+  // if admin changes the displayed price manually, try to keep originalPrice consistent when discountPercent exists
+  onPriceChange() {
+    const p = Number(this.productForm.price || 0);
+    const pct = Number(this.productForm.discountPercent || 0);
+    if (p > 0 && pct > 0) {
+      this.productForm.originalPrice = Math.round(p / (1 - pct / 100));
+    }
+  }
+
   edit(product: Product) {
     this.productForm = { ...product, imageUrls: [...(product.imageUrls || [])] };
     scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   deleteProduct(id: number) {
-    if (confirm('تعطيل المنتج؟')) {
+    if (confirm('Disable product?')) {
       this.api.deleteProduct(id).subscribe(() => {
-        this.toast.success('تم تعطيل المنتج');
+        this.toast.success('Product disabled');
         this.load();
       });
     }
@@ -216,7 +300,7 @@ export class AdminProductsComponent implements OnInit {
 
   resetProduct() {
     this.productForm = this.emptyProduct();
-    this.toast.info('النموذج جاهز لإضافة منتج جديد');
+    this.toast.info('Form is ready to add a new product');
   }
 
   prepareProductPayload(): Partial<Product> {
@@ -231,9 +315,14 @@ export class AdminProductsComponent implements OnInit {
     if (payload.promotionType === 'DISCOUNT') {
       payload.giftProductId = undefined;
       payload.giftQuantity = undefined;
+      // keep discountPercent only for discount promotions
+      if (!payload.discountPercent) payload.discountPercent = undefined;
     }
     if (payload.promotionType === 'GIFT_PRODUCT') {
       payload.originalPrice = undefined;
+    }
+    if (payload.promotionType !== 'DISCOUNT') {
+      payload.discountPercent = undefined;
     }
     return payload;
   }
@@ -243,9 +332,9 @@ export class AdminProductsComponent implements OnInit {
   }
 
   offerLabel(product: Product) {
-    if (product.promotionType === 'DISCOUNT') return product.promotionTitle || 'خصم';
-    if (product.promotionType === 'GIFT_PRODUCT') return product.promotionTitle || 'هدية';
-    return 'بدون عرض';
+    if (product.promotionType === 'DISCOUNT') return product.promotionTitle || 'Discount';
+    if (product.promotionType === 'GIFT_PRODUCT') return product.promotionTitle || 'Gift';
+    return 'No Offer';
   }
 
   imageUrl(url: string) {
@@ -253,7 +342,7 @@ export class AdminProductsComponent implements OnInit {
   }
 
   money(value?: number | null) {
-    return `${value || 0} ج.م`;
+    return `${value || 0} EGP`;
   }
 
   private emptyProduct(): Partial<Product> {
@@ -262,6 +351,7 @@ export class AdminProductsComponent implements OnInit {
       description: '',
       price: 0,
       cost: 0,
+      discountPercent: undefined,
       stockQuantity: 0,
       lowStockThreshold: 5,
       active: true,

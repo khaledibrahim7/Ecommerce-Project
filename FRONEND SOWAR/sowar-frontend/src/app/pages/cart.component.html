@@ -1,0 +1,73 @@
+<div class="page fade-in">
+  <div class="section-title">
+    <h1>Shopping Cart</h1>
+  </div>
+
+  @if (cart(); as c) {
+    @if (c.items.length > 0) {
+      <div class="cart-layout">
+        <main class="cart-items-list">
+          @for (item of c.items; track item.productId) {
+            <div class="card cart-item">
+              <!-- Product Image -->
+              <a [routerLink]="['/products', item.productId]" class="cart-item__image">
+                <img [src]="imageUrl(item.imageUrl)" [alt]="item.productName">
+              </a>
+
+              <!-- Product Details -->
+              <div class="cart-item__details">
+                <a [routerLink]="['/products', item.productId]" class="cart-item__name">{{ item.productName }}</a>
+                <p class="cart-item__price">{{ money(item.unitPrice) }}</p>
+              </div>
+
+              <!-- Quantity Selector -->
+              <div class="cart-item__actions">
+                <div class="quantity-selector">
+                  <button (click)="update(item.productId, item.quantity - 1)">-</button>
+                  <input type="number" min="1" [value]="item.quantity" (change)="update(item.productId, $any($event.target).value)">
+                  <button (click)="update(item.productId, item.quantity + 1)">+</button>
+                </div>
+              </div>
+
+              <!-- Line Total -->
+              <p class="cart-item__total">{{ money(item.lineTotal) }}</p>
+
+              <!-- Remove Button -->
+              <button class="btn-remove" (click)="remove(item.productId)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          }
+        </main>
+
+        <aside class="card summary-panel">
+          <h2 class="summary-panel__title">Order Summary</h2>
+          <div class="summary-line">
+            <span>Subtotal</span>
+            <strong>{{ money(c.subtotal) }}</strong>
+          </div>
+          <div class="summary-line">
+            <span>Shipping</span>
+            <strong class="muted">Calculated at checkout</strong>
+          </div>
+          <div class="summary-line total">
+            <span>Total</span>
+            <strong>{{ money(c.subtotal) }}</strong>
+          </div>
+          <a routerLink="/checkout" class="btn btn-checkout">Proceed to Checkout</a>
+          <button class="btn ghost btn-clear" (click)="clear()">Clear Cart</button>
+        </aside>
+      </div>
+    } @else {
+      <div class="empty card">
+        <h2>Your cart is empty!</h2>
+        <p>You haven't added any products yet. Browse our products and add what you like.</p>
+        <a routerLink="/products" class="btn">Shop Now</a>
+      </div>
+    }
+  } @else {
+    <p class="empty">Loading cart...</p>
+  }
+</div>

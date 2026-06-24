@@ -2,10 +2,10 @@ spring:
   application:
     name: sowar-honey-store
   mail:
-    host: ${SOWAR_MAIL_HOST:}
+    host: ${SOWAR_MAIL_HOST:smtp.gmail.com}
     port: ${SOWAR_MAIL_PORT:587}
-    username: ${SOWAR_MAIL_USERNAME:}
-    password: ${SOWAR_MAIL_PASSWORD:}
+    username: ${SOWAR_MAIL_USERNAME:smartdiagnosis85@gmail.com}
+    password: ${SOWAR_MAIL_PASSWORD:zmmo ddnt bkyt eoxy}
     properties:
       mail:
         smtp:
@@ -29,11 +29,18 @@ server:
 
 app:
   jwt:
-    secret: "change-this-secret-to-a-long-random-production-secret-change-this"
+    secret: "7b9e1d2c3b4a5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
     expiration-minutes: 1440
   upload-dir: uploads
   notifications:
     low-stock-email-to: ${SOWAR_LOW_STOCK_EMAIL_TO:${SOWAR_ADMIN_EMAIL:khaled@gmail.com}}
+  invoice:
+    taxpayer-id: ${SOWAR_INVOICE_TAXPAYER_ID:}
+    portal:
+      enabled: ${SOWAR_INVOICE_PORTAL_ENABLED:false}
+      base-url: ${SOWAR_INVOICE_PORTAL_BASE_URL:}
+      client-id: ${SOWAR_INVOICE_PORTAL_CLIENT_ID:}
+      client-secret: ${SOWAR_INVOICE_PORTAL_CLIENT_SECRET:}
   admin:
     full-name: ${SOWAR_ADMIN_FULL_NAME:Sowar Admin}
     phone: ${SOWAR_ADMIN_PHONE:01110853581}

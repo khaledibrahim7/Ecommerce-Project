@@ -6,10 +6,14 @@ package com.sowar.store.service.impl;
 import com.sowar.store.dto.*;
 import com.sowar.store.entity.*;
 import com.sowar.store.entity.enums.OrderStatus;
+import com.sowar.store.entity.enums.NotificationType;
 import com.sowar.store.repository.*;
 import com.sowar.store.common.ApiException;
 import com.sowar.store.common.InsufficientStockException;
 import com.sowar.store.security.CurrentUser;
+import com.sowar.store.service.AppEmailService;
+import com.sowar.store.service.ElectronicInvoiceService;
+import com.sowar.store.service.NotificationService;
 import com.sowar.store.service.OrderService;
 import com.sowar.store.service.ShippingService;
 import com.sowar.store.service.LowStockNotificationService;
@@ -38,6 +42,9 @@ public class OrderServiceImpl implements OrderService {
     private final LowStockNotificationService lowStockNotificationService;
     private final PromotionStrategyFactory promotionStrategyFactory;
     private final OrderMapper orderMapper;
+    private final NotificationService notificationService;
+    private final AppEmailService appEmailService;
+    private final ElectronicInvoiceService electronicInvoiceService;
 
 
 
@@ -113,6 +120,8 @@ public class OrderServiceImpl implements OrderService {
         order.setEstimatedProfit(estimatedProfit);
         Order savedOrder = orderRepository.save(order);
         addStatusHistory(savedOrder, OrderStatus.PLACED, "تم قبول طلبك بنجاح. سيتم التواصل بك لتوصيل الأوردر خلال أيام.");
+        notifyAdminsAboutNewOrder(savedOrder);
+        electronicInvoiceService.createForOrder(savedOrder);
         return orderMapper.toResponse(savedOrder, orderStatusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(savedOrder.getId()));
     }
 
@@ -168,12 +177,94 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Order not found"));
         OrderStatus previousStatus = order.getStatus();
+        validateStatusTransition(previousStatus, status);
+        if (previousStatus == status) {
+            return orderMapper.toResponse(order, orderStatusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(order.getId()));
+        }
         if (status == OrderStatus.CANCELLED && previousStatus != OrderStatus.CANCELLED) {
             restoreStock(order);
         }
         order.setStatus(status);
-        addStatusHistory(order, status, note == null || note.isBlank() ? "Order status changed to " + status.name() : note);
+        String statusNote = note == null || note.isBlank() ? "تم تحديث حالة الطلب إلى " + statusLabel(status) : note;
+        addStatusHistory(order, status, statusNote);
+        notifyCustomerAboutOrderStatus(order, status, statusNote);
         return orderMapper.toResponse(order, orderStatusHistoryRepository.findByOrderIdOrderByCreatedAtAsc(order.getId()));
+    }
+
+    private void validateStatusTransition(OrderStatus current, OrderStatus next) {
+        if (current == next) {
+            return;
+        }
+        if (current == OrderStatus.DELIVERED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Delivered orders cannot be changed");
+        }
+        if (current == OrderStatus.CANCELLED) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Cancelled orders cannot be changed");
+        }
+        if (next == OrderStatus.CANCELLED) {
+            return;
+        }
+        if (statusRank(next) <= statusRank(current)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Order status cannot move backwards");
+        }
+    }
+
+    private int statusRank(OrderStatus status) {
+        return switch (status) {
+            case PLACED -> 1;
+            case CONTACTING_CUSTOMER -> 2;
+            case CONFIRMED -> 3;
+            case SHIPPING -> 4;
+            case DELIVERED -> 5;
+            case CANCELLED -> 99;
+        };
+    }
+
+    private void notifyAdminsAboutNewOrder(Order order) {
+        String title = "طلب جديد #" + order.getId();
+        String message = "وصل طلب جديد من " + order.getCustomerName() + " بإجمالي " + order.getTotal() + " ج.م.";
+        String targetUrl = "/admin/orders/" + order.getId();
+        notificationService.notifyAdmins(NotificationType.NEW_ORDER, title, message, targetUrl);
+        appEmailService.sendAdminMail(title, """
+                مرحبا،
+
+                وصل طلب جديد على متجر سوار.
+
+                رقم الطلب: #%d
+                العميل: %s
+                الهاتف: %s
+                الإجمالي: %s ج.م
+
+                برجاء مراجعة الطلب من لوحة التحكم.
+                """.formatted(order.getId(), order.getCustomerName(), order.getCustomerPhone(), order.getTotal()));
+    }
+
+    private void notifyCustomerAboutOrderStatus(Order order, OrderStatus status, String note) {
+        String title = "تحديث طلب #" + order.getId();
+        String message = "حالة طلبك أصبحت: " + statusLabel(status) + ". " + note;
+        String targetUrl = "/orders/" + order.getId();
+        notificationService.notifyUser(order.getCustomer(), NotificationType.ORDER_STATUS_CHANGED, title, message, targetUrl);
+        appEmailService.send(order.getCustomer().getEmail(), title, """
+                مرحبا %s،
+
+                تم تحديث حالة طلبك رقم #%d.
+
+                الحالة: %s
+                الملاحظة: %s
+
+                شكرا لاختيارك سوار.
+                """.formatted(order.getCustomerName(), order.getId(), statusLabel(status), note));
+    }
+
+    private String statusLabel(OrderStatus status) {
+        return switch (status) {
+            case PLACED -> "تم الطلب";
+            case CONTACTING_CUSTOMER -> "جاري التواصل";
+            case CONFIRMED -> "تم التأكيد";
+            case SHIPPING -> "قيد الشحن";
+            case DELIVERED -> "تم التسليم";
+            case CANCELLED -> "ملغي";
+        };
     }
 
     private void restoreStock(Order order) {

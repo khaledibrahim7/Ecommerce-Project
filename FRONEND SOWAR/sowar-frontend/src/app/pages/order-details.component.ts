@@ -9,20 +9,20 @@ import { Order } from '../core/models';
   template: `
     @if (order(); as o) {
       <section class="page">
-        <div class="section-title"><h1>طلب #{{ o.id }}</h1><span class="status-badge {{ o.status }}">{{ o.status }}</span></div>
+        <div class="section-title"><h1>Order #{{ o.id }}</h1><span class="status-badge {{ o.status }}">{{ o.status }}</span></div>
         <div class="layout">
           <div class="card box">
-            <h2>المنتجات</h2>
+            <h2>Products</h2>
             @for (item of o.items; track item.productId) {
-              <div class="line"><span>{{ item.productName }} × {{ item.quantity }}</span><strong>{{ item.lineTotal }} ج.م</strong></div>
+              <div class="line"><span>{{ item.productName }} × {{ item.quantity }}</span><strong>{{ item.lineTotal }} EGP</strong></div>
             }
-            <div class="line"><span>الشحن</span><strong>{{ o.shippingFee }} ج.م</strong></div>
-            <div class="line total"><span>الإجمالي</span><strong>{{ o.total }} ج.م</strong></div>
+            <div class="line"><span>Shipping</span><strong>{{ o.shippingFee }} EGP</strong></div>
+            <div class="line total"><span>Total</span><strong>{{ o.total }} EGP</strong></div>
           </div>
           <div class="card box">
-            <h2>العنوان</h2>
+            <h2>Address</h2>
             <p>{{ o.address }}</p>
-            <h2>التاريخ</h2>
+            <h2>History</h2>
             @for (h of o.statusHistory; track h.createdAt) {
               <p><strong>{{ h.status }}</strong> - {{ h.createdAt | date:'short' }}</p>
             }

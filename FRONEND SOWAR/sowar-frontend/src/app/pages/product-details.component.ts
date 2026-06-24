@@ -10,112 +10,102 @@ import { ToastService } from '../core/toast.service';
 @Component({
   imports: [FormsModule, DatePipe],
   template: `
-    @if (product(); as p) {
-      <section class="page details">
-        <div class="gallery card">
-          <img [src]="selectedImage || imageUrl(p)" [alt]="p.name">
-          @if ((p.imageUrls || []).length > 1) {
-            <div class="thumbs">
-              @for (image of p.imageUrls; track image) {
-                <button type="button" (click)="selectedImage = imageUrl(p, image)">
-                  <img [src]="imageUrl(p, image)" [alt]="p.name">
-                </button>
+    <div class="page fade-in">
+      @if (product(); as p) {
+        <div class="details-grid">
+          <div class="gallery">
+            <div class="card gallery__main-image">
+              <img [src]="selectedImage || imageUrl(p)" [alt]="p.name">
+            </div>
+            @if ((p.imageUrls || []).length > 1) {
+              <div class="gallery__thumbs">
+                @for (image of p.imageUrls; track image) {
+                  <button type="button" class="thumb-btn" [class.active]="imageUrl(p, image) === selectedImage" (click)="selectedImage = imageUrl(p, image)">
+                    <img [src]="imageUrl(p, image)" [alt]="p.name">
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <div class="card info">
+            <p class="info__category">{{ p.categoryName || 'Honey Product' }}</p>
+            <h1 class="info__title">{{ p.name }}</h1>
+            <div class="prices">
+              <span class="price">{{ p.price }} EGP</span>
+              @if (showOldPrice(p)) {
+                <span class="old-price">{{ p.originalPrice }} EGP</span>
               }
             </div>
-          }
-        </div>
-        <div class="info">
-          <p class="muted">{{ p.categoryName || 'منتج عسل' }}</p>
-          <h1>{{ p.name }}</h1>
-          <div class="prices">
-            @if (showOldPrice(p)) {
-              <span class="old-price">{{ p.originalPrice }} ج.م</span>
+            @if (hasOffer(p)) {
+              <div class="status-badge" [class.CANCELLED]="p.promotionType === 'DISCOUNT'" [class.PLACED]="p.promotionType === 'GIFT_PRODUCT'">
+                <strong>{{ p.promotionTitle || (p.promotionType === 'DISCOUNT' ? 'Discount' : 'Gift') }}</strong>
+              </div>
             }
-            <span class="price">{{ p.price }} ج.م</span>
-          </div>
-          @if (hasOffer(p)) {
-            <div class="offer">
-              <strong>{{ p.promotionTitle || (p.promotionType === 'DISCOUNT' ? 'خصم' : 'هدية') }}</strong>
-              @if (p.promotionDescription) { <span>{{ p.promotionDescription }}</span> }
-              @if (p.promotionType === 'GIFT_PRODUCT') { <span>هدية: {{ p.giftProductName }} × {{ p.giftQuantity }}</span> }
+            <p class="info__description">{{ p.description }}</p>
+            <div class="buy-actions">
+              <div class="quantity-selector">
+                <button (click)="quantity = quantity > 1 ? quantity - 1 : 1">-</button>
+                <input type="number" min="1" [(ngModel)]="quantity">
+                <button (click)="quantity = quantity + 1">+</button>
+              </div>
+              <button class="btn" (click)="addToCart(p)">Add to Cart</button>
+              <button class="btn secondary" (click)="addWishlist(p)">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px; height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+              </button>
             </div>
-          }
-          <p>{{ p.description }}</p>
-          <dl>
-            <div><dt>الوزن</dt><dd>{{ p.weight || '-' }}</dd></div>
-            <div><dt>المصدر</dt><dd>{{ p.origin || '-' }}</dd></div>
-            <div><dt>المكونات</dt><dd>{{ p.ingredients || '-' }}</dd></div>
-            <div><dt>الاستخدام</dt><dd>{{ p.usageInstructions || '-' }}</dd></div>
-            <div><dt>التخزين</dt><dd>{{ p.storageInstructions || '-' }}</dd></div>
-          </dl>
-          <div class="buy">
-            <input type="number" min="1" [(ngModel)]="quantity">
-            <button class="btn" (click)="addToCart(p)">إضافة للسلة</button>
-            <button class="btn secondary" (click)="addWishlist(p)">إضافة للمفضلة</button>
           </div>
         </div>
-      </section>
 
-      <section class="page support">
-        <div class="card box">
-          <h2>التقييمات</h2>
-          <div class="form-row">
-            <select [(ngModel)]="rating">
-              <option [ngValue]="5">5 نجوم</option>
-              <option [ngValue]="4">4 نجوم</option>
-              <option [ngValue]="3">3 نجوم</option>
-              <option [ngValue]="2">2 نجوم</option>
-              <option [ngValue]="1">1 نجمة</option>
-            </select>
-            <input [(ngModel)]="reviewComment" placeholder="اكتب تقييمك">
-            <button class="btn" (click)="submitReview(p.id)">إرسال</button>
+        <section class="specs-section card">
+          <h3 class="filters-panel__title">Product Specifications</h3>
+          <dl class="specs-dl">
+            @if(p.weight) { <div><dt>Weight</dt><dd>{{ p.weight }}</dd></div> }
+            @if(p.origin) { <div><dt>Origin</dt><dd>{{ p.origin }}</dd></div> }
+            @if(p.ingredients) { <div><dt>Ingredients</dt><dd>{{ p.ingredients }}</dd></div> }
+            @if(p.usageInstructions) { <div><dt>Usage</dt><dd>{{ p.usageInstructions }}</dd></div> }
+            @if(p.storageInstructions) { <div><dt>Storage</dt><dd>{{ p.storageInstructions }}</dd></div> }
+          </dl>
+        </section>
+
+        <section class="support-section">
+          <h2 class="section-title">Reviews and Questions</h2>
+          <div class="support-grid">
+            <div class="card">
+              <h3 class="filters-panel__title">Reviews ({{ reviews().length }})</h3>
+              <div class="support-form">
+                <select [(ngModel)]="rating"><option [ngValue]="5">5 stars</option><!-- ... --></select>
+                <input [(ngModel)]="reviewComment" placeholder="Write your review">
+                <button class="btn ghost" (click)="submitReview(p.id)">Submit</button>
+              </div>
+              @for (review of reviews(); track review.id) {
+                <article class="item-card">
+                  <strong>{{ review.customerName }} - {{ review.rating }}/5</strong>
+                  <p>{{ review.comment }}</p>
+                  <small>{{ review.createdAt | date:'short' }}</small>
+                </article>
+              } @empty { <p class="empty">No reviews yet.</p> }
+            </div>
+            <div class="card">
+              <h3 class="filters-panel__title">Questions ({{ questions().length }})</h3>
+              <div class="support-form">
+                <input [(ngModel)]="questionText" placeholder="Ask about the product">
+                <button class="btn ghost" (click)="submitQuestion(p.id)">Submit</button>
+              </div>
+              @for (question of questions(); track question.id) {
+                <article class="item-card">
+                  <strong>{{ question.question }}</strong>
+                  <p>{{ question.answer || 'Waiting for admin response' }}</p>
+                </article>
+              } @empty { <p class="empty">No questions yet.</p> }
+            </div>
           </div>
-          @for (review of reviews(); track review.id) {
-            <article class="item">
-              <strong>{{ review.customerName }} - {{ review.rating }}/5</strong>
-              <p>{{ review.comment }}</p>
-              <small>{{ review.createdAt | date:'short' }}</small>
-            </article>
-          }
-        </div>
-        <div class="card box">
-          <h2>الأسئلة</h2>
-          <div class="form-row">
-            <input [(ngModel)]="questionText" placeholder="اسأل عن المنتج">
-            <button class="btn" (click)="submitQuestion(p.id)">إرسال</button>
-          </div>
-          @for (question of questions(); track question.id) {
-            <article class="item">
-              <strong>{{ question.question }}</strong>
-              <p>{{ question.answer || 'بانتظار رد الأدمن' }}</p>
-            </article>
-          }
-        </div>
-      </section>
-    }
+        </section>
+      } @else {
+        <p class="empty">Loading product...</p>
+      }
+    </div>
   `,
-  styles: [`
-    .details { display: grid; grid-template-columns: minmax(280px, 460px) 1fr; gap: 28px; }
-    .gallery { padding: 0; overflow: hidden; background: #f7ecd6; }
-    .gallery > img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-    .thumbs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 10px; background: #fffaf2; }
-    .thumbs button { border: 1px solid #eadfca; border-radius: 6px; padding: 0; overflow: hidden; background: #fff; cursor: pointer; }
-    .thumbs img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-    h1 { margin: 0 0 8px; font-size: clamp(2rem, 5vw, 4rem); }
-    .info { display: grid; gap: 14px; align-content: start; }
-    .prices { display: flex; gap: 12px; align-items: baseline; font-size: 1.35rem; }
-    .offer { display: grid; gap: 4px; padding: 10px 12px; border-radius: 6px; background: #dcfce7; color: #166534; }
-    dl { display: grid; gap: 8px; }
-    dl div { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding-bottom: 8px; border-bottom: 1px solid #eadfca; }
-    dt { color: #7c6a55; }
-    dd { margin: 0; }
-    .buy, .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .buy input { width: 90px; }
-    .support { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 0; }
-    .box { padding: 18px; }
-    .item { border-top: 1px solid #eadfca; padding: 12px 0; }
-    @media (max-width: 800px) { .details, .support { grid-template-columns: 1fr; } }
-  `]
+  styleUrls: ['./product-details.component.scss']
 })
 export class ProductDetailsComponent implements OnInit {
   product = signal<Product | null>(null);
@@ -153,26 +143,38 @@ export class ProductDetailsComponent implements OnInit {
 
   imageUrl(product: Product, forcedUrl?: string) {
     const url = forcedUrl || product.imageUrls?.[0];
-    return url ? (url.startsWith('http') ? url : `http://localhost:8080${url}`) : 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80';
+    if (!url) {
+      return 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80';
+    }
+    if (url.startsWith('http')) {
+      return url;
+    }
+    if (url.startsWith('/')) {
+      const baseUrl = 'http://localhost:8080';
+      return `${baseUrl}${url}`;
+    }
+    return 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80';
   }
 
   addToCart(product: Product) {
     if (!this.auth.isLoggedIn()) return this.router.navigate(['/login']);
-    return this.api.saveCartItem(product.id, this.quantity).subscribe(() => this.toast.success('تمت إضافة المنتج للسلة'));
+    return this.api.saveCartItem(product.id, this.quantity).subscribe(() => this.toast.success('Product added to cart'));
   }
 
   addWishlist(product: Product) {
     if (!this.auth.isLoggedIn()) return this.router.navigate(['/login']);
-    return this.api.addWishlist(product.id).subscribe(() => this.toast.success('تمت إضافة المنتج للمفضلة'));
+    return this.api.addWishlist(product.id).subscribe(() => this.toast.success('Product added to wishlist'));
   }
 
   submitReview(productId: number) {
     if (!this.auth.isLoggedIn()) return this.router.navigate(['/login']);
-    return this.api.addReview(productId, this.rating, this.reviewComment).subscribe(() => { this.reviewComment = ''; this.toast.success('تم إرسال التقييم'); this.loadSocial(productId); });
+    if (!this.reviewComment) return this.toast.error('Please write a review');
+    return this.api.addReview(productId, this.rating, this.reviewComment).subscribe(() => { this.reviewComment = ''; this.toast.success('Review submitted successfully'); this.loadSocial(productId); });
   }
 
   submitQuestion(productId: number) {
     if (!this.auth.isLoggedIn()) return this.router.navigate(['/login']);
-    return this.api.askQuestion(productId, this.questionText).subscribe(() => { this.questionText = ''; this.toast.success('تم إرسال السؤال'); this.loadSocial(productId); });
+    if (!this.questionText) return this.toast.error('Please write a question');
+    return this.api.askQuestion(productId, this.questionText).subscribe(() => { this.questionText = ''; this.toast.success('Question submitted successfully'); this.loadSocial(productId); });
   }
 }

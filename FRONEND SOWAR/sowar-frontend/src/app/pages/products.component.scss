@@ -1,0 +1,76 @@
+// Using global design system variables
+
+.shop-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+.filters-panel {
+  position: sticky;
+  top: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-xl); // Use .card padding
+}
+
+.filters-panel__title {
+  font-size: 1.5rem;
+  margin: 0;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--spacing-lg);
+}
+
+.filter-group {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.products-area__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-2xl);
+  padding: var(--spacing-lg);
+}
+
+.pager__btn {
+  // Uses .btn.ghost styles
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.pager__info {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+// Responsive adjustments
+@media (max-width: 900px) {
+  .shop-layout {
+    grid-template-columns: 1fr;
+  }
+  .filters-panel {
+    position: static;
+    margin-bottom: var(--spacing-xl);
+  }
+}

@@ -14,10 +14,13 @@ import { WishlistComponent } from './pages/wishlist.component';
 import { AdminDashboardComponent } from './pages/admin-dashboard.component';
 import { AdminProductsComponent } from './pages/admin-products.component';
 import { AdminOrderDetailsComponent } from './pages/admin-order-details.component';
+import { AdminReceiptPrintComponent } from './pages/admin-receipt-print.component';
 import { LogoutComponent } from './pages/logout.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'preview/products', component: ProductsComponent },
+  { path: 'preview/products/:id', component: ProductDetailsComponent },
   { path: 'products', component: ProductsComponent },
   { path: 'products/:id', component: ProductDetailsComponent },
   { path: 'login', component: LoginComponent },
@@ -31,6 +34,7 @@ export const routes: Routes = [
   { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
   { path: 'admin/products', component: AdminProductsComponent, canActivate: [adminGuard] },
   { path: 'admin/orders/:id', component: AdminOrderDetailsComponent, canActivate: [adminGuard] },
+  { path: 'admin/orders/:id/receipt', component: AdminReceiptPrintComponent, canActivate: [adminGuard] },
   { path: 'logout', component: LogoutComponent },
   { path: '**', redirectTo: '' }
 ];

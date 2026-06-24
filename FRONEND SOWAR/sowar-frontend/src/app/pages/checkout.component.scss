@@ -1,0 +1,106 @@
+// Using global design system variables for a premium checkout experience
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+.checkout-panel {
+  // Uses .card styles
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.panel-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.address-display {
+  padding: var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+
+  p { margin: 0.25rem 0; }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+.review-items {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+.review-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+
+  img {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--border-light);
+  }
+
+  &__info {
+    flex-grow: 1;
+    small { color: var(--text-muted); }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-light);
+}
+
+.summary-panel {
+  position: sticky;
+  top: var(--spacing-2xl);
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &.total {
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-light);
+  }
+}
+
+// Responsive
+@media (max-width: 960px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+  .summary-panel {
+    position: static;
+  }
+}
