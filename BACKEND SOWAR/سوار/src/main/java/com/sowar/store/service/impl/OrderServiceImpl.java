@@ -71,6 +71,7 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingGovernorate(governorate);
         order.setShippingFee(governorate.getShippingFee());
         order.setNotes(request.notes());
+        order.setPaymentMethod(request.paymentMethod());
 
         BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal estimatedProfit = BigDecimal.ZERO;
@@ -134,6 +135,7 @@ public class OrderServiceImpl implements OrderService {
         CreateOrderRequest orderRequest = new CreateOrderRequest(
                 request.deliveryAddress(),
                 request.notes(),
+                request.paymentMethod(),
                 cartItems.stream()
                         .map(item -> new CreateOrderRequest.OrderItemRequest(item.getProduct().getId(), item.getQuantity()))
                         .toList()

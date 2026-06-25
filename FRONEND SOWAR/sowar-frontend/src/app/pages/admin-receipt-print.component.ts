@@ -53,7 +53,7 @@ import { ElectronicInvoice, Order } from '../core/models';
           </div>
 
           <footer>
-            <p>Payment: Cash on Delivery</p>
+            <p>Payment: {{ getPaymentMethod(o.paymentMethod) }} - {{ o.paid ? 'PAID' : 'UNPAID' }}</p>
             <p>Thank you for choosing Sowar</p>
           </footer>
         </article>
@@ -99,6 +99,16 @@ export class AdminReceiptPrintComponent implements OnInit {
 
   money(value?: number | null) {
     return `${value || 0} EGP`;
+  }
+
+  getPaymentMethod(method?: string | null): string {
+    if (!method) return 'Cash on Delivery';
+    const labels: Record<string, string> = {
+      CASH: 'Cash on Delivery',
+      VISA: 'Credit Card',
+      WALLET: 'Mobile Wallet'
+    };
+    return labels[method.toUpperCase()] || method;
   }
 
   print() {

@@ -1,11 +1,15 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { AddressRequest, AppNotification, AuthResponse, Cart, Category, CheckoutResponse, ContactLink, ElectronicInvoice, Expense, LoginType, Order, PageResponse, Product, Question, Report, Review, ShippingGovernorate, UserProfile } from './models';
 
 const API_URL = 'http://localhost:8080/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
+  cartUpdated$ = new Subject<void>();
+
   constructor(private http: HttpClient) {}
 
   login(loginType: LoginType, identifier: string, password: string) {
@@ -57,19 +61,27 @@ export class ApiService {
   }
 
   saveCartItem(productId: number, quantity: number) {
-    return this.http.post<Cart>(`${API_URL}/cart/items`, { productId, quantity });
+    return this.http.post<Cart>(`${API_URL}/cart/items`, { productId, quantity }).pipe(
+      tap(() => this.cartUpdated$.next())
+    );
   }
 
   removeCartItem(productId: number) {
-    return this.http.delete<void>(`${API_URL}/cart/items/${productId}`);
+    return this.http.delete<void>(`${API_URL}/cart/items/${productId}`).pipe(
+      tap(() => this.cartUpdated$.next())
+    );
   }
 
   clearCart() {
-    return this.http.delete<void>(`${API_URL}/cart`);
+    return this.http.delete<void>(`${API_URL}/cart`).pipe(
+      tap(() => this.cartUpdated$.next())
+    );
   }
 
-  checkout(notes?: string, deliveryAddress?: AddressRequest) {
-    return this.http.post<CheckoutResponse>(`${API_URL}/orders/checkout`, { notes, deliveryAddress });
+  checkout(notes?: string, deliveryAddress?: AddressRequest, paymentMethod?: string) {
+    return this.http.post<CheckoutResponse>(`${API_URL}/orders/checkout`, { notes, deliveryAddress, paymentMethod }).pipe(
+      tap(() => this.cartUpdated$.next())
+    );
   }
 
   myOrders() {
@@ -248,5 +260,9 @@ export class ApiService {
 
   markAllNotificationsRead() {
     return this.http.put<void>(`${API_URL}/notifications/read-all`, {});
+  }
+
+  paymobPaymentUrl(orderId: number, paymentMethod: string, walletNumber?: string) {
+    return this.http.post<{ url: string }>(`${API_URL}/paymob/payment-url`, { orderId, paymentMethod, walletNumber });
   }
 }

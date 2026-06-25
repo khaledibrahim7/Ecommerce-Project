@@ -87,16 +87,63 @@ import { ToastService } from '../core/toast.service';
                   </div>
                 }
               </div>
-              <div class="payment-method">
-                <div class="address-display">
-                  <p><strong>Cash on Delivery</strong></p>
-                  <p class="muted">The order will be confirmed by phone after clicking 'Confirm Final Order'.</p>
+              <!-- Luxury Payment Methods Selector -->
+              <div class="payment-section">
+                <h3>طريقة الدفع / Payment Method</h3>
+                <div class="payment-grid">
+                  <button type="button" class="payment-option-card" [class.active]="selectedPaymentMethod() === 'CASH'" (click)="selectedPaymentMethod.set('CASH')">
+                    <div class="option-icon">💵</div>
+                    <div class="option-info">
+                      <strong>الدفع عند الاستلام (COD)</strong>
+                      <small>الدفع كاش عند استلام الأوردر.</small>
+                    </div>
+                  </button>
+
+                  <button type="button" class="payment-option-card" [class.active]="selectedPaymentMethod() === 'VISA'" (click)="selectedPaymentMethod.set('VISA')">
+                    <div class="option-icon">💳</div>
+                    <div class="option-info">
+                      <strong>بطاقة ائتمان (Visa / Card)</strong>
+                      <small>الدفع أونلاين بالفيزا أو الماستركارد.</small>
+                    </div>
+                  </button>
+
+                  <button type="button" class="payment-option-card" [class.active]="selectedPaymentMethod() === 'WALLET'" (click)="selectedPaymentMethod.set('WALLET')">
+                    <div class="option-icon">📱</div>
+                    <div class="option-info">
+                      <strong>محفظة إلكترونية (Wallet)</strong>
+                      <small>فودافون كاش أو إنستاباي.</small>
+                    </div>
+                  </button>
+                </div>
+
+                <div class="payment-method-details">
+                  @if (selectedPaymentMethod() === 'CASH') {
+                    <p class="muted">📦 سيتم تأكيد الأوردر هاتفياً وشحنه فوراً والدفع نقداً عند الاستلام.</p>
+                  }
+                  @else if (selectedPaymentMethod() === 'VISA') {
+                    <div class="payment-instruction mock-card-form">
+                      <label>رقم البطاقة / Card Number <input placeholder="4000 1234 5678 9010" disabled></label>
+                      <div class="half-inputs">
+                        <label>تاريخ الانتهاء / Expiry <input placeholder="MM / YY" disabled></label>
+                        <label>رمز الأمان / CVV <input placeholder="123" disabled></label>
+                      </div>
+                      <p class="mock-info-tag">⚠️ بوابة الدفع بالبطاقة حالياً قيد التجربة (Sandbox Mode).</p>
+                    </div>
+                  }
+                  @else if (selectedPaymentMethod() === 'WALLET') {
+                    <div class="payment-instruction wallet-details">
+                      <label>رقم المحفظة الإلكترونية (فودافون كاش / إلخ) / Wallet Phone Number
+                        <input [(ngModel)]="walletNumber" placeholder="01012345678" type="tel" style="width: 100%; box-sizing: border-box; margin-top: 6px;">
+                      </label>
+                      <p class="muted" style="margin-top: 8px;">⚠️ سيتم توجيهك إلى صفحة تأكيد الدفع الخاصة بمحفظتك بعد النقر على الزر بالأسفل.</p>
+                    </div>
+                  }
                 </div>
               </div>
               <div class="action-buttons">
                 <button class="btn secondary" (click)="step.set(1)">Back</button>
                 <button class="btn" [disabled]="placingOrder" (click)="placeOrder()">
-                  {{ placingOrder ? 'Placing Order...' : 'Confirm Final Order' }}
+                  {{ placingOrder ? 'Placing Order...' : (selectedPaymentMethod() === 'CASH' ? 'Confirm Final Order' : 'Pay Now & Confirm') }}
                 </button>
               </div>
             }
@@ -125,6 +172,8 @@ export class CheckoutComponent implements OnInit {
   deliveryNotes = '';
   orderNotes = '';
   placingOrder = false;
+  selectedPaymentMethod = signal('CASH');
+  walletNumber = '';
 
   shippingFee = computed(() => {
     const activeProfile = this.isEditingAddress() ? this.editableProfile() : this.profile();
@@ -180,13 +229,41 @@ export class CheckoutComponent implements OnInit {
     const deliveryAddress = this.profile()?.address;
     if (!deliveryAddress) return this.toast.error('No shipping address found.');
 
+    const method = this.selectedPaymentMethod();
+    if (method === 'WALLET' && !this.walletNumber.trim()) {
+      return this.toast.error('يرجى إدخال رقم المحفظة الإلكترونية.');
+    }
+
     this.placingOrder = true;
-    this.api.checkout(this.orderNotes, { ...deliveryAddress, deliveryNotes: this.deliveryNotes }).subscribe({
+    this.api.checkout(this.deliveryNotes, { ...deliveryAddress, deliveryNotes: this.deliveryNotes }, method).subscribe({
       next: response => {
-        this.placingOrder = false;
         const orderId = response.orderId || response.orderDetails?.id;
-        this.toast.success(response.message || 'Order confirmed successfully!');
-        this.router.navigate(['/orders', orderId]);
+        
+        if (method === 'CASH') {
+          this.placingOrder = false;
+          this.toast.success(response.message || 'Order confirmed successfully!');
+          this.router.navigate(['/orders', orderId]);
+        } else {
+          // VISA or WALLET payment redirection
+          this.toast.info('جاري الاتصال ببوابة Paymob، يرجى الانتظار...');
+          this.api.paymobPaymentUrl(orderId, method, this.walletNumber).subscribe({
+            next: payResponse => {
+              this.placingOrder = false;
+              if (payResponse.url) {
+                // Redirect user to Paymob Accept
+                window.location.href = payResponse.url;
+              } else {
+                this.toast.error('Failed to generate payment URL.');
+                this.router.navigate(['/orders', orderId]);
+              }
+            },
+            error: () => {
+              this.placingOrder = false;
+              this.toast.error('حدث خطأ أثناء الاتصال ببوابة الدفع.');
+              this.router.navigate(['/orders', orderId]);
+            }
+          });
+        }
       },
       error: () => {
         this.placingOrder = false;

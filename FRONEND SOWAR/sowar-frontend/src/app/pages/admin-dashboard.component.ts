@@ -235,14 +235,14 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
     </section>
   `,
   styles: [`
-    .admin { position: relative; width: min(1240px, calc(100% - 28px)); margin-top: 18px; padding: 24px; border-radius: 8px; background: linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,250,240,.5)); overflow: hidden; isolation: isolate; }
+    .admin { position: relative; width: min(1240px, calc(100% - 28px)); margin-top: 18px; padding: 24px; border-radius: var(--radius-lg); background: transparent; overflow: hidden; isolation: isolate; }
     .admin::before {
       content: "Sowar";
       position: absolute;
       inset-inline-start: 18px;
       top: -34px;
       z-index: -1;
-      color: rgba(166, 106, 20, .055);
+      color: rgba(212, 163, 92, 0.04);
       font-size: clamp(7rem, 18vw, 15rem);
       font-weight: 900;
       line-height: 1;
@@ -251,38 +251,38 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
     .admin-head {
       align-items: center;
       padding: 22px 24px;
-      border: 1px solid #eadfca;
-      border-radius: 8px;
-      background:
-        radial-gradient(circle at 8% 20%, rgba(20, 83, 45, .08), transparent 18rem),
-        linear-gradient(135deg, rgba(255,255,255,.98), rgba(255,248,233,.92));
-      box-shadow: 0 18px 42px rgba(77, 52, 24, .08);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-sm);
     }
-    .admin-head h1 { font-size: clamp(2rem, 4vw, 3rem); color: #24170a; }
-    .admin-head .muted { margin: 8px 0 0; color: #7c6a55; }
+    .admin-head h1 { font-size: clamp(2rem, 4vw, 3rem); color: var(--text-primary); }
+    .admin-head .muted { margin: 8px 0 0; color: var(--text-secondary); }
     .tabs {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       margin: 18px 0;
       padding: 8px;
-      border: 1px solid #eadfca;
-      border-radius: 8px;
-      background: rgba(255,255,255,.74);
-      box-shadow: 0 12px 30px rgba(77, 52, 24, .07);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      box-shadow: var(--shadow-sm);
     }
     .tabs .btn {
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       padding: 11px 16px;
       font-weight: 800;
       box-shadow: none;
-      color: #4a3420;
-      background: #f7ecd6;
+      color: var(--text-secondary);
+      background: var(--bg-tertiary);
     }
     .tabs .active {
-      color: #fff;
-      background: #24170a;
-      box-shadow: 0 10px 24px rgba(36, 23, 10, .18);
+      color: var(--bg-base);
+      background: var(--accent-primary);
+      box-shadow: 0 4px 12px var(--shadow-glow);
     }
     .metric-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); align-items: stretch; gap: 14px; }
     .metric {
@@ -292,10 +292,13 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       align-content: center;
       gap: 8px;
       padding: 20px;
-      border: 1px solid #eadfca;
-      background: rgba(255,255,255,.94);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       overflow: hidden;
-      box-shadow: 0 18px 36px rgba(77, 52, 24, .09);
+      box-shadow: var(--shadow-sm);
     }
     .metric::before {
       content: "";
@@ -307,33 +310,40 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       border-radius: 999px;
       background: var(--tone, #ca8a04);
     }
-    .metric span { color: #4b3824; font-weight: 800; margin: 0; }
-    .metric strong { display: block; line-height: 1.1; font-size: 1.9rem; color: #160d05; }
-    .metric small { color: #6b4d34; font-size: .88rem; }
-    .tone-orders { --tone: #8b5cf6; background: linear-gradient(135deg, #ffffff, #eee7ff); }
-    .tone-active { --tone: #10b981; background: linear-gradient(135deg, #ffffff, #dffbf0); }
-    .tone-cancelled { --tone: #ef4444; background: linear-gradient(135deg, #ffffff, #ffe4e6); }
-    .tone-sales { --tone: #14b8a6; background: linear-gradient(135deg, #ffffff, #dcfffb); }
-    .tone-profit { --tone: #d69e2e; background: linear-gradient(135deg, #ffffff, #fff0bd); }
-    .tone-stock { --tone: #f97316; background: linear-gradient(135deg, #ffffff, #ffead5); }
-    .tone-expense { --tone: #e11d48; background: linear-gradient(135deg, #ffffff, #ffe4ec); }
-    .tone-profit-year { --tone: #3b82f6; background: linear-gradient(135deg, #ffffff, #dcecff); }
+    .metric span { color: var(--text-secondary); font-weight: 800; margin: 0; }
+    .metric strong { display: block; line-height: 1.1; font-size: 1.9rem; color: var(--text-primary); }
+    .metric small { color: var(--text-muted); font-size: .88rem; }
+
+    .tone-orders { --tone: #8b5cf6; background: linear-gradient(135deg, var(--bg-card), rgba(139, 92, 246, 0.08)); }
+    .tone-active { --tone: #10b981; background: linear-gradient(135deg, var(--bg-card), rgba(16, 185, 129, 0.08)); }
+    .tone-cancelled { --tone: #ef4444; background: linear-gradient(135deg, var(--bg-card), rgba(239, 68, 68, 0.08)); }
+    .tone-sales { --tone: #14b8a6; background: linear-gradient(135deg, var(--bg-card), rgba(20, 184, 166, 0.08)); }
+    .tone-profit { --tone: #d4a35c; background: linear-gradient(135deg, var(--bg-card), rgba(212, 163, 92, 0.08)); }
+    .tone-stock { --tone: #f97316; background: linear-gradient(135deg, var(--bg-card), rgba(249, 115, 22, 0.08)); }
+    .tone-expense { --tone: #e11d48; background: linear-gradient(135deg, var(--bg-card), rgba(225, 29, 72, 0.08)); }
+    .tone-profit-year { --tone: #3b82f6; background: linear-gradient(135deg, var(--bg-card), rgba(59, 130, 246, 0.08)); }
+
     .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .panel { padding: 20px; overflow-x: auto; margin-bottom: 16px; background: rgba(255,255,255,.96); box-shadow: 0 18px 42px rgba(77,52,24,.08); }
-    .panel h2 { margin-top: 0; }
-    h3 { margin: 18px 0 10px; color: #4a3420; }
+    .panel { padding: 24px; overflow-x: auto; margin-bottom: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-md); }
+    .panel h2 { margin-top: 0; font-family: var(--font-title); font-size: 1.5rem; color: var(--text-primary); border-bottom: 2px solid var(--accent-primary); padding-bottom: 8px; margin-bottom: 16px; display: inline-block; }
+    h3 { margin: 18px 0 10px; color: var(--text-primary); font-family: var(--font-title); }
     .inline-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 14px; }
     .actions-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-    .upload-box { display: grid; gap: 8px; padding: 14px; border: 1px dashed #c88a24; border-radius: 8px; background: #fffaf2; color: #4a3420; font-weight: 800; cursor: pointer; }
+    .upload-box { display: grid; gap: 8px; padding: 14px; border: 1px dashed var(--accent-primary); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-secondary); font-weight: 800; cursor: pointer; }
     .image-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-    .image-chip { display: grid; gap: 6px; padding: 8px; border: 1px solid #eadfca; border-radius: 8px; background: #fff; }
-    .image-chip img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
-    .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid #eadfca; }
-    .question-row { display: grid; grid-template-columns: 1fr minmax(260px, 360px); gap: 12px; padding: 14px 0; border-top: 1px solid #eadfca; }
+    .image-chip { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-card); }
+    .image-chip img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-top: 1px solid var(--border-color); }
+    .question-row { display: grid; grid-template-columns: 1fr minmax(260px, 360px); gap: 12px; padding: 14px 0; border-top: 1px solid var(--border-color); }
     .question-row textarea { min-height: 78px; margin-bottom: 8px; }
     td .btn, .row .btn { margin-inline-start: 6px; }
-    .pill { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: #dcfce7; color: #166534; font-weight: 800; }
-    .pill.warn { background: #fef3c7; color: #92400e; }
+    .pill { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: rgba(39, 174, 96, 0.1); color: var(--accent-success); font-weight: 800; }
+    .pill.warn { background: rgba(242, 153, 74, 0.1); color: var(--accent-warning); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border-color); text-align: left; }
+    th { font-family: var(--font-title); color: var(--text-primary); font-weight: 700; background: var(--bg-secondary); }
+    td { color: var(--text-secondary); }
 
     .orders-grid {
       display: grid;
@@ -341,10 +351,12 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       gap: 16px;
     }
     .order-card {
-      border: 1px solid #eadfca;
-      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
       padding: 16px;
-      background: #fff;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .order-header {
       display: flex;
@@ -356,8 +368,16 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       margin: 0;
       font-size: 1.2rem;
     }
+    .order-header h3 a {
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+    .order-header h3 a:hover {
+      text-decoration: underline;
+    }
     .order-body p {
       margin: 4px 0;
+      color: var(--text-secondary);
     }
     .order-actions {
       margin-top: 12px;

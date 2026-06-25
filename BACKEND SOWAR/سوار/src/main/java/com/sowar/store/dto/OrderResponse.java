@@ -24,6 +24,8 @@ public record OrderResponse(
         BigDecimal total,
         BigDecimal estimatedProfit,
         String notes,
+        String paymentMethod,
+        boolean paid,
         List<Item> items,
         List<StatusHistory> statusHistory
 ) {

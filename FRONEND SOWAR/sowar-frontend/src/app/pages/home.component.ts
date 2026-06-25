@@ -9,7 +9,7 @@ import { ProductCardComponent } from '../shared/product-card.component';
 @Component({
   imports: [RouterLink, ProductCardComponent],
   template: `
-    <section class="hero">
+    <section class="hero" style="background-image: linear-gradient(to right, rgba(12, 9, 6, 0.2) 0%, rgba(12, 9, 6, 0.7) 100%), url('/user-honey.jpg'); background-size: cover; background-position: center;">
       <div class="hero-content">
         <h1>Sowar Natural Honey</h1>
         <p>Discover the purity of nature in every spoonful. Our authentic honey products offer a unique experience of quality and unforgettable taste.</p>
@@ -35,97 +35,128 @@ import { ProductCardComponent } from '../shared/product-card.component';
     </section>
   `,
   styles: [`
+    @keyframes hero-entry {
+      from {
+        transform: scale(1.03);
+        opacity: 0.8;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
     .hero {
-      min-height: 480px;
-      display: grid;
+      position: relative;
+      min-height: 520px;
+      display: flex;
       align-items: center;
-      padding: 2rem;
-      color: var(--text-primary);
-      background: linear-gradient(90deg, rgba(3,6,10,0.6), rgba(3,6,10,0.25)), url('https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1600&q=80') center/cover;
-      border-radius: 0 0 20px 20px;
-      margin-bottom: 3rem;
+      padding: var(--spacing-3xl) clamp(16px, 6vw, 80px);
+      margin-bottom: var(--spacing-3xl);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      animation: hero-entry 1.2s ease-out;
     }
     .hero-content {
-      max-width: 650px;
+      max-width: 600px;
+      background: rgba(12, 9, 6, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: var(--spacing-2xl);
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
       display: grid;
-      gap: 1rem;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      gap: 16px;
+      animation: fadeIn var(--transition-slow);
     }
     .hero h1 {
       margin: 0;
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      font-weight: 700;
-      line-height: 1.1;
+      font-family: var(--font-title);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      line-height: 1.15;
     }
     .hero p {
       margin: 0;
-      font-size: 1.15rem;
-      max-width: 90%;
-      line-height: 1.6;
+      font-size: 1.1rem;
+      color: #eae0d5;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      line-height: 1.7;
     }
     .hero-actions {
       display: flex;
-      gap: 1rem;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-top: 1rem;
+      margin-top: 8px;
     }
     .btn {
-      padding: 0.8rem 1.8rem;
-      border-radius: 8px;
+      padding: 12px 28px;
+      border-radius: var(--radius-md);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all var(--transition-base);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
     .btn-primary {
       background-color: var(--accent-primary);
-      color: #042025;
-      border: 1px solid rgba(14,165,164,0.15);
+      color: #0c0906;
+      box-shadow: 0 4px 14px rgba(212, 163, 92, 0.3);
     }
     .btn-primary:hover {
-      filter: brightness(1.05);
-      box-shadow: var(--shadow-md);
+      background-color: var(--accent-secondary);
+      transform: translateY(-2px);
     }
     .btn-secondary {
-      background-color: rgba(255,255,255,0.1);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.5);
+      background-color: transparent;
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.7);
     }
     .btn-secondary:hover {
-      background-color: rgba(255,255,255,0.2);
+      background-color: #ffffff;
+      color: #0c0906;
+      border-color: #ffffff;
+      transform: translateY(-2px);
     }
 
     .featured-products {
-      padding-bottom: 3rem;
+      padding-bottom: var(--spacing-4xl);
     }
     .section-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
+      align-items: flex-end;
+      margin-bottom: var(--spacing-xl);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: var(--spacing-sm);
     }
     .section-header h2 {
       font-size: 1.8rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-primary);
+      margin: 0;
     }
     .view-all-link {
-      color: var(--accent-secondary);
+      color: var(--accent-primary);
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: color var(--transition-fast);
     }
     .view-all-link:hover {
+      color: var(--accent-secondary);
       text-decoration: underline;
-      color: var(--accent-primary);
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
+      gap: var(--spacing-xl);
     }
   `]
 })

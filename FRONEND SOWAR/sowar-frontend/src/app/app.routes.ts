@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard, authGuard, customerGuard } from './core/auth.guard';
+import { WelcomeComponent } from './pages/welcome.component';
 import { HomeComponent } from './pages/home.component';
 import { ProductsComponent } from './pages/products.component';
 import { ProductDetailsComponent } from './pages/product-details.component';
@@ -18,7 +19,8 @@ import { AdminReceiptPrintComponent } from './pages/admin-receipt-print.componen
 import { LogoutComponent } from './pages/logout.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: '', component: WelcomeComponent },
+  { path: 'home', component: HomeComponent },
   { path: 'preview/products', component: ProductsComponent },
   { path: 'preview/products/:id', component: ProductDetailsComponent },
   { path: 'products', component: ProductsComponent },

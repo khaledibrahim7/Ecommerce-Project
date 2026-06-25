@@ -39,9 +39,21 @@ import { ToastService } from '../core/toast.service';
           </section>
 
           <section class="card box">
-            <h2>Address</h2>
+            <h2>Address & Payment</h2>
             <p>{{ o.address }}</p>
             <p class="muted">{{ o.governorate }}</p>
+            <div style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; flex-direction: column; gap: 6px;">
+              <p><strong>طريقة الدفع / Payment Method:</strong> {{ getPaymentMethodLabel(o.paymentMethod) }}</p>
+              <p>
+                <strong>حالة الدفع / Payment Status:</strong>
+                <span class="status-badge" [class.PAID]="o.paid" [class.UNPAID]="!o.paid" style="margin-inline-start: 6px;">
+                  {{ o.paid ? 'تم الدفع (Paid)' : 'لم يتم الدفع (Unpaid)' }}
+                </span>
+              </p>
+              @if (o.notes) {
+                <p style="margin-top: 4px;"><strong>ملاحظات العميل / Customer Notes:</strong> {{ o.notes }}</p>
+              }
+            </div>
           </section>
         </div>
 
@@ -68,7 +80,7 @@ import { ToastService } from '../core/toast.service';
       </section>
     }
   `,
-  styles: [`.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{padding:18px;margin-bottom:16px;display:grid;gap:10px}.line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eadfca}.total{font-size:1.2rem}.order-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}@media(max-width:800px){.layout{grid-template-columns:1fr}}`]
+  styles: [`.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}.box{padding:24px;margin-bottom:16px;display:grid;gap:12px;border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-sm);}.box h2 {margin: 0 0 8px 0; font-family: var(--font-title); font-size: 1.35rem; color: var(--text-primary); border-bottom: 2px solid var(--accent-primary); padding-bottom: 6px; display: inline-block; justify-self: start;}.line{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-color);color:var(--text-secondary);}.line span{color:var(--text-secondary);}.line strong{color:var(--text-primary);}.total{font-size:1.25rem;font-weight:700;}.total span,.total strong{color:var(--accent-primary) !important;font-weight:800;}.status-badge.PAID { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); } .status-badge.UNPAID { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); } .order-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}@media(max-width:800px){.layout{grid-template-columns:1fr}}`]
 })
 export class AdminOrderDetailsComponent implements OnInit {
   order = signal<Order | null>(null);
@@ -78,6 +90,16 @@ export class AdminOrderDetailsComponent implements OnInit {
   constructor(private route: ActivatedRoute, private api: ApiService, private toast: ToastService) {}
 
   ngOnInit() { this.load(); }
+
+  getPaymentMethodLabel(method?: string | null): string {
+    if (!method) return 'الدفع عند الاستلام (Cash on Delivery)';
+    const labels: Record<string, string> = {
+      CASH: 'الدفع عند الاستلام (Cash on Delivery)',
+      VISA: 'بطاقة ائتمان (Visa / Card)',
+      WALLET: 'محفظة إلكترونية (Mobile Wallet)'
+    };
+    return labels[method.toUpperCase()] || method;
+  }
 
   load() {
     const id = Number(this.route.snapshot.paramMap.get('id'));

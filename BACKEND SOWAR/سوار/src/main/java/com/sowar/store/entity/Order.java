@@ -63,6 +63,11 @@ public class Order extends BaseEntity {
     @Column(length = 2000)
     private String notes;
 
+    private String paymentMethod;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean paid = false;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 }

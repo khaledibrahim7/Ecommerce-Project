@@ -111,6 +111,8 @@ export interface Order {
   total: number;
   estimatedProfit: number;
   notes?: string;
+  paymentMethod?: string;
+  paid: boolean;
   items: OrderItem[];
   statusHistory: { status: OrderStatus; note: string; createdAt: string }[];
 }

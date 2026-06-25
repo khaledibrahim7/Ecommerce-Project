@@ -144,7 +144,7 @@ export class ProductDetailsComponent implements OnInit {
   imageUrl(product: Product, forcedUrl?: string) {
     const url = forcedUrl || product.imageUrls?.[0];
     if (!url) {
-      return 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80';
+      return 'https://unsplash.com/photos/yN5m1L3Xg20/download';
     }
     if (url.startsWith('http')) {
       return url;
@@ -153,7 +153,7 @@ export class ProductDetailsComponent implements OnInit {
       const baseUrl = 'http://localhost:8080';
       return `${baseUrl}${url}`;
     }
-    return 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=1200&q=80';
+    return 'https://unsplash.com/photos/yN5m1L3Xg20/download';
   }
 
   addToCart(product: Product) {

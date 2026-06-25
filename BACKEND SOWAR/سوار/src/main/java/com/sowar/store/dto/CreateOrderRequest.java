@@ -11,6 +11,7 @@ import java.util.List;
 public record CreateOrderRequest(
         @Valid AddressRequest deliveryAddress,
         String notes,
+        String paymentMethod,
         @NotEmpty List<@Valid OrderItemRequest> items
 ) {
     public record OrderItemRequest(@NotNull Long productId, @Positive int quantity) {

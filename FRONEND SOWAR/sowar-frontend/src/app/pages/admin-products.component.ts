@@ -135,16 +135,16 @@ import { ToastService } from '../core/toast.service';
   `,
   styles: [`
     .admin-products { display: grid; gap: 16px; }
-    .panel { padding: 20px; overflow-x: auto; }
-    .panel h2 { margin-top: 0; }
-    h3 { margin: 18px 0 10px; color: #4a3420; }
+    .panel { padding: 24px; overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--shadow-md); }
+    .panel h2 { margin-top: 0; font-family: var(--font-title); color: var(--text-primary); border-bottom: 2px solid var(--accent-primary); padding-bottom: 8px; margin-bottom: 16px; display: inline-block; }
+    h3 { margin: 18px 0 10px; color: var(--text-primary); font-family: var(--font-title); }
     .actions-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .upload-box { display: grid; gap: 8px; padding: 14px; border: 1px dashed #c88a24; border-radius: 8px; background: #fffaf2; color: #4a3420; font-weight: 800; cursor: pointer; }
+    .upload-box { display: grid; gap: 8px; padding: 14px; border: 1px dashed var(--accent-primary); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-secondary); font-weight: 800; cursor: pointer; }
     .image-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-    .image-chip { display: grid; gap: 6px; padding: 8px; border: 1px solid #eadfca; border-radius: 8px; background: #fff; }
-    .image-chip img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
-    .pill { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: #dcfce7; color: #166534; font-weight: 800; }
-    .pill.warn { background: #fef3c7; color: #92400e; }
+    .image-chip { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-card); }
+    .image-chip img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); }
+    .pill { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: rgba(39, 174, 96, 0.1); color: var(--accent-success); font-weight: 800; }
+    .pill.warn { background: rgba(242, 153, 74, 0.1); color: var(--accent-warning); }
 
     .product-grid {
       display: grid;
@@ -152,18 +152,21 @@ import { ToastService } from '../core/toast.service';
       gap: 16px;
     }
     .product-card {
-      border: 1px solid #eadfca;
-      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
       padding: 16px;
       display: flex;
       flex-direction: column;
-      background: #fff;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-sm);
     }
     .product-image {
       width: 100%;
       aspect-ratio: 16 / 9;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       margin-bottom: 12px;
     }
     .product-info {
@@ -172,20 +175,23 @@ import { ToastService } from '../core/toast.service';
     .product-info h3 {
       margin: 0 0 8px;
       font-size: 1.1rem;
+      font-family: var(--font-title);
+      color: var(--text-primary);
     }
     .product-info p {
       margin: 4px 0;
-      color: #555;
+      color: var(--text-secondary);
     }
     .prices {
       display: flex;
       gap: 8px;
       align-items: baseline;
       font-size: 1.1rem;
+      color: var(--text-primary);
     }
     .old-price {
       text-decoration: line-through;
-      color: #999;
+      color: var(--text-muted);
       font-size: 0.9rem;
     }
     .product-actions {
