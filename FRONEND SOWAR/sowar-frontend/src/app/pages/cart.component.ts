@@ -3,16 +3,21 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { Cart } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
 export class CartComponent implements OnInit {
   cart = signal<Cart | null>(null);
 
-  constructor(private api: ApiService, private toast: ToastService) {}
+  constructor(
+    private api: ApiService,
+    private toast: ToastService,
+    public translate: TranslateService
+  ) {}
 
   ngOnInit() {
     this.load();
@@ -42,7 +47,8 @@ export class CartComponent implements OnInit {
   }
 
   clear() {
-    if (!confirm('Are you sure you want to clear the cart?')) return;
+    const confirmMsg = this.translate.instant('Are you sure you want to clear the cart?');
+    if (!confirm(confirmMsg)) return;
     this.api.clearCart().subscribe(() => {
       this.toast.success('Cart cleared');
       this.load();
@@ -50,7 +56,7 @@ export class CartComponent implements OnInit {
   }
 
   money(value?: number | null) {
-    return `${value || 0} EGP`;
+    return `${value || 0} ${this.translate.instant('EGP')}`;
   }
 
   imageUrl(url: string | null | undefined): string {

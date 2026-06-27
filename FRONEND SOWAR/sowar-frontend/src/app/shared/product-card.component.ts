@@ -1,32 +1,33 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Product } from '../core/models';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-product-card',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <article class="card product">
       <a [routerLink]="['/products', product.id]" class="image-container">
         <img [src]="imageUrl()" [alt]="product.name">
         @if (hasOffer()) {
-          <span class="badge">{{ offerLabel() }}</span>
+          <span class="badge">{{ offerLabel() | translate }}</span>
         }
       </a>
       <div class="body">
         <a [routerLink]="['/products', product.id]" class="name">{{ product.name }}</a>
-        <p class="muted">{{ product.categoryName || product.weight || 'Natural Honey' }}</p>
+        <p class="muted">{{ product.categoryName || product.weight || ('Natural Honey' | translate) }}</p>
         <div class="prices">
           @if (showOldPrice()) {
-            <span class="old-price">{{ product.originalPrice }} EGP</span>
+            <span class="old-price">{{ product.originalPrice }} {{ 'EGP' | translate }}</span>
           }
-          <span class="price">{{ product.price }} EGP</span>
+          <span class="price">{{ product.price }} {{ 'EGP' | translate }}</span>
         </div>
         @if (product.promotionType === 'GIFT_PRODUCT') {
-          <p class="gift">Gift: {{ product.giftProductName }} × {{ product.giftQuantity }}</p>
+          <p class="gift">{{ 'Gift' | translate }}: {{ product.giftProductName }} × {{ product.giftQuantity }}</p>
         }
         <div class="actions">
-          <button class="btn-add-to-cart" type="button" (click)="addToCart.emit(product)">Add to Cart</button>
+          <button class="btn-add-to-cart" type="button" (click)="addToCart.emit(product)">{{ 'Add to Cart' | translate }}</button>
           <button class="btn-wishlist" type="button" (click)="toggleWishlist.emit(product)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />

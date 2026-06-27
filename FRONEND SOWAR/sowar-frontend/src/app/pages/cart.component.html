@@ -1,6 +1,6 @@
 <div class="page fade-in">
   <div class="section-title">
-    <h1>Shopping Cart</h1>
+    <h1>{{ 'Shopping Cart' | translate }}</h1>
   </div>
 
   @if (cart(); as c) {
@@ -43,31 +43,31 @@
         </main>
 
         <aside class="card summary-panel">
-          <h2 class="summary-panel__title">Order Summary</h2>
+          <h2 class="summary-panel__title">{{ 'Order Summary' | translate }}</h2>
           <div class="summary-line">
-            <span>Subtotal</span>
+            <span>{{ 'Subtotal' | translate }}</span>
             <strong>{{ money(c.subtotal) }}</strong>
           </div>
           <div class="summary-line">
-            <span>Shipping</span>
-            <strong class="muted">Calculated at checkout</strong>
+            <span>{{ 'Shipping' | translate }}</span>
+            <strong class="muted">{{ 'Calculated at checkout' | translate }}</strong>
           </div>
           <div class="summary-line total">
-            <span>Total</span>
+            <span>{{ 'Total' | translate }}</span>
             <strong>{{ money(c.subtotal) }}</strong>
           </div>
-          <a routerLink="/checkout" class="btn btn-checkout">Proceed to Checkout</a>
-          <button class="btn ghost btn-clear" (click)="clear()">Clear Cart</button>
+          <a routerLink="/checkout" class="btn btn-checkout">{{ 'Proceed to Checkout' | translate }}</a>
+          <button class="btn ghost btn-clear" (click)="clear()">{{ 'Clear Cart' | translate }}</button>
         </aside>
       </div>
     } @else {
       <div class="empty card">
-        <h2>Your cart is empty!</h2>
-        <p>You haven't added any products yet. Browse our products and add what you like.</p>
-        <a routerLink="/products" class="btn">Shop Now</a>
+        <h2>{{ 'Your cart is empty!' | translate }}</h2>
+        <p>{{ "You haven't added any products yet. Browse our products and add what you like." | translate }}</p>
+        <a routerLink="/products" class="btn">{{ 'Shop Now' | translate }}</a>
       </div>
     }
   } @else {
-    <p class="empty">Loading cart...</p>
+    <p class="empty">{{ 'Loading cart...' | translate }}</p>
   }
 </div>

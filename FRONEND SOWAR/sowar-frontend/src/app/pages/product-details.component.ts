@@ -6,9 +6,10 @@ import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { Product, Question, Review } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, TranslatePipe],
   template: `
     <div class="page fade-in">
       @if (product(); as p) {
@@ -28,7 +29,7 @@ import { ToastService } from '../core/toast.service';
             }
           </div>
           <div class="card info">
-            <p class="info__category">{{ p.categoryName || 'Honey Product' }}</p>
+            <p class="info__category">{{ (p.categoryName || 'Honey Product') | translate }}</p>
             <h1 class="info__title">{{ p.name }}</h1>
             <div class="prices">
               <span class="price">{{ p.price }} EGP</span>
@@ -48,7 +49,7 @@ import { ToastService } from '../core/toast.service';
                 <input type="number" min="1" [(ngModel)]="quantity">
                 <button (click)="quantity = quantity + 1">+</button>
               </div>
-              <button class="btn" (click)="addToCart(p)">Add to Cart</button>
+              <button class="btn" (click)="addToCart(p)">{{ 'Add to Cart' | translate }}</button>
               <button class="btn secondary" (click)="addWishlist(p)">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px; height:20px;"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
               </button>
@@ -57,25 +58,31 @@ import { ToastService } from '../core/toast.service';
         </div>
 
         <section class="specs-section card">
-          <h3 class="filters-panel__title">Product Specifications</h3>
+          <h3 class="filters-panel__title">{{ 'Product Specifications' | translate }}</h3>
           <dl class="specs-dl">
-            @if(p.weight) { <div><dt>Weight</dt><dd>{{ p.weight }}</dd></div> }
-            @if(p.origin) { <div><dt>Origin</dt><dd>{{ p.origin }}</dd></div> }
-            @if(p.ingredients) { <div><dt>Ingredients</dt><dd>{{ p.ingredients }}</dd></div> }
-            @if(p.usageInstructions) { <div><dt>Usage</dt><dd>{{ p.usageInstructions }}</dd></div> }
-            @if(p.storageInstructions) { <div><dt>Storage</dt><dd>{{ p.storageInstructions }}</dd></div> }
+            @if(p.weight) { <div><dt>{{ 'Weight' | translate }}</dt><dd>{{ p.weight }}</dd></div> }
+            @if(p.origin) { <div><dt>{{ 'Origin' | translate }}</dt><dd>{{ p.origin }}</dd></div> }
+            @if(p.ingredients) { <div><dt>{{ 'Ingredients' | translate }}</dt><dd>{{ p.ingredients }}</dd></div> }
+            @if(p.usageInstructions) { <div><dt>{{ 'Usage' | translate }}</dt><dd>{{ p.usageInstructions }}</dd></div> }
+            @if(p.storageInstructions) { <div><dt>{{ 'Storage' | translate }}</dt><dd>{{ p.storageInstructions }}</dd></div> }
           </dl>
         </section>
 
         <section class="support-section">
-          <h2 class="section-title">Reviews and Questions</h2>
+          <h2 class="section-title">{{ 'Reviews and Questions' | translate }}</h2>
           <div class="support-grid">
             <div class="card">
-              <h3 class="filters-panel__title">Reviews ({{ reviews().length }})</h3>
+              <h3 class="filters-panel__title">{{ 'Reviews' | translate }} ({{ reviews().length }})</h3>
               <div class="support-form">
-                <select [(ngModel)]="rating"><option [ngValue]="5">5 stars</option><!-- ... --></select>
-                <input [(ngModel)]="reviewComment" placeholder="Write your review">
-                <button class="btn ghost" (click)="submitReview(p.id)">Submit</button>
+                <select [(ngModel)]="rating">
+                  <option [ngValue]="5">5 {{ 'stars' | translate }}</option>
+                  <option [ngValue]="4">4 {{ 'stars' | translate }}</option>
+                  <option [ngValue]="3">3 {{ 'stars' | translate }}</option>
+                  <option [ngValue]="2">2 {{ 'stars' | translate }}</option>
+                  <option [ngValue]="1">1 {{ 'stars' | translate }}</option>
+                </select>
+                <input [(ngModel)]="reviewComment" [placeholder]="'Write your review' | translate">
+                <button class="btn ghost" (click)="submitReview(p.id)">{{ 'Submit' | translate }}</button>
               </div>
               @for (review of reviews(); track review.id) {
                 <article class="item-card">
@@ -83,25 +90,25 @@ import { ToastService } from '../core/toast.service';
                   <p>{{ review.comment }}</p>
                   <small>{{ review.createdAt | date:'short' }}</small>
                 </article>
-              } @empty { <p class="empty">No reviews yet.</p> }
+              } @empty { <p class="empty">{{ 'No reviews yet.' | translate }}</p> }
             </div>
             <div class="card">
-              <h3 class="filters-panel__title">Questions ({{ questions().length }})</h3>
+              <h3 class="filters-panel__title">{{ 'Questions' | translate }} ({{ questions().length }})</h3>
               <div class="support-form">
-                <input [(ngModel)]="questionText" placeholder="Ask about the product">
-                <button class="btn ghost" (click)="submitQuestion(p.id)">Submit</button>
+                <input [(ngModel)]="questionText" [placeholder]="'Ask about the product' | translate">
+                <button class="btn ghost" (click)="submitQuestion(p.id)">{{ 'Submit' | translate }}</button>
               </div>
               @for (question of questions(); track question.id) {
                 <article class="item-card">
                   <strong>{{ question.question }}</strong>
-                  <p>{{ question.answer || 'Waiting for admin response' }}</p>
+                  <p>{{ question.answer || ('Waiting for admin response' | translate) }}</p>
                 </article>
-              } @empty { <p class="empty">No questions yet.</p> }
+              } @empty { <p class="empty">{{ 'No questions yet.' | translate }}</p> }
             </div>
           </div>
         </section>
       } @else {
-        <p class="empty">Loading product...</p>
+        <p class="empty">{{ 'Loading product...' | translate }}</p>
       }
     </div>
   `,

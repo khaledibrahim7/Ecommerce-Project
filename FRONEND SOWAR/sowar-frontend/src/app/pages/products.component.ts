@@ -6,17 +6,18 @@ import { AuthService } from '../core/auth.service';
 import { Category, Product } from '../core/models';
 import { ToastService } from '../core/toast.service';
 import { ProductCardComponent } from '../shared/product-card.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  imports: [FormsModule, ProductCardComponent],
+  imports: [FormsModule, ProductCardComponent, TranslatePipe],
   template: `
     <section class="page">
       <!-- Luxury Banner Header -->
       <div class="products-header">
         <div class="header-content">
-          <span class="category-pre">Organic Boutique</span>
-          <h1>Our Pure Honey Collections</h1>
-          <p>100% natural, raw, and unpasteurized honey directly from local apiaries.</p>
+          <span class="category-pre">{{ 'Organic Boutique' | translate }}</span>
+          <h1>{{ 'Our Pure Honey Collections' | translate }}</h1>
+          <p>{{ '100% natural, raw, and unpasteurized honey directly from local apiaries.' | translate }}</p>
         </div>
       </div>
 
@@ -26,14 +27,14 @@ import { ProductCardComponent } from '../shared/product-card.component';
           <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input placeholder="Search products..." [(ngModel)]="q" (input)="page = 0; load()">
+          <input [placeholder]="'Search products...' | translate" [(ngModel)]="q" (input)="page = 0; load()">
         </div>
         
         <div class="filter-controls">
           <!-- Premium Category Dropdown -->
           <div class="category-dropdown-wrapper">
             <button class="dropdown-btn" (click)="toggleCategoryMenu($event)" type="button">
-              <span>{{ getCategoryLabel() }}</span>
+              <span>{{ getCategoryLabel() | translate }}</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow-icon" [class.open]="categoryMenuOpen()">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
@@ -41,7 +42,7 @@ import { ProductCardComponent } from '../shared/product-card.component';
             @if (categoryMenuOpen()) {
               <div class="dropdown-menu">
                 <button class="dropdown-item" [class.active]="categoryId === undefined" (click)="selectCategory(undefined)" type="button">
-                  All Products
+                  {{ 'All Products' | translate }}
                 </button>
                 @for (cat of categories(); track cat.id) {
                   <button class="dropdown-item" [class.active]="categoryId === cat.id" (click)="selectCategory(cat.id)" type="button">
@@ -54,10 +55,10 @@ import { ProductCardComponent } from '../shared/product-card.component';
 
           <div class="select-wrapper">
             <select [(ngModel)]="sort" (change)="page = 0; load()">
-              <option value="featured">Featured</option>
-              <option value="newest">Newest Products</option>
-              <option value="priceAsc">Price: Low to High</option>
-              <option value="priceDesc">Price: High to Low</option>
+              <option value="featured">{{ 'Featured' | translate }}</option>
+              <option value="newest">{{ 'Newest Products' | translate }}</option>
+              <option value="priceAsc">{{ 'Price: Low to High' | translate }}</option>
+              <option value="priceDesc">{{ 'Price: High to Low' | translate }}</option>
             </select>
           </div>
           
@@ -65,7 +66,7 @@ import { ProductCardComponent } from '../shared/product-card.component';
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
             </svg>
-            <span>Reset</span>
+            <span>{{ 'Reset' | translate }}</span>
           </button>
         </div>
       </div>
@@ -77,9 +78,9 @@ import { ProductCardComponent } from '../shared/product-card.component';
         } @empty {
           <div class="empty-state">
             <div class="empty-icon">🍯</div>
-            <h3>No Products Found</h3>
-            <p>We couldn't find any products matching your search criteria. Try adjusting your filters or search term.</p>
-            <button class="btn btn-primary" (click)="resetFilters()">Clear Filters</button>
+            <h3>{{ 'No Products Found' | translate }}</h3>
+            <p>{{ "We couldn't find any products matching your search criteria. Try adjusting your filters or search term." | translate }}</p>
+            <button class="btn btn-primary" (click)="resetFilters()">{{ 'Clear Filters' | translate }}</button>
           </div>
         }
       </div>
@@ -89,7 +90,7 @@ import { ProductCardComponent } from '../shared/product-card.component';
         <button class="page-btn prev" [disabled]="page === 0" (click)="page = page - 1; load()" aria-label="Previous Page">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <span class="page-indicator">Page {{ page + 1 }} of {{ totalPages() || 1 }}</span>
+        <span class="page-indicator">{{ 'Page' | translate }} {{ page + 1 }} {{ 'of' | translate }} {{ totalPages() || 1 }}</span>
         <button class="page-btn next" [disabled]="page + 1 >= totalPages()" (click)="page = page + 1; load()" aria-label="Next Page">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>

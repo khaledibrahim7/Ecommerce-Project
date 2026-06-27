@@ -5,76 +5,77 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
 import { Order } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  imports: [DatePipe, FormsModule, RouterLink],
+  imports: [DatePipe, FormsModule, RouterLink, TranslatePipe],
   template: `
     @if (order(); as o) {
       <section class="page">
         <div class="section-title">
           <div>
-            <h1>Order Details #{{ o.id }}</h1>
+            <h1>{{ 'Order Details' | translate }} #{{ o.id }}</h1>
             <p class="muted">{{ o.customerName }} - {{ o.customerPhone }}</p>
           </div>
           <div class="order-actions">
-            <a class="btn secondary" [routerLink]="['/admin/orders', o.id, 'receipt']">Print Cashier Receipt</a>
+            <a class="btn secondary" [routerLink]="['/admin/orders', o.id, 'receipt']">{{ 'Print Cashier Receipt' | translate }}</a>
             <span class="status-badge {{ o.status }}">{{ statusLabel(o.status) }}</span>
           </div>
         </div>
 
         <div class="layout">
           <section class="card box">
-            <h2>Change Status</h2>
+            <h2>{{ 'Change Status' | translate }}</h2>
             <select [(ngModel)]="status" [disabled]="isFinalStatus(o.status)">
               <option [value]="o.status">{{ statusLabel(o.status) }}</option>
               @for (next of nextStatuses(o.status); track next) {
                 <option [value]="next">{{ statusLabel(next) }}</option>
               }
             </select>
-            <textarea [(ngModel)]="note" placeholder="Note to appear in order history"></textarea>
-            <button class="btn" [disabled]="isFinalStatus(o.status) || status === o.status" (click)="update(o.id)">Save Status</button>
+            <textarea [(ngModel)]="note" [placeholder]="'Note to appear in order history' | translate"></textarea>
+            <button class="btn" [disabled]="isFinalStatus(o.status) || status === o.status" (click)="update(o.id)">{{ 'Save Status' | translate }}</button>
             @if (isFinalStatus(o.status)) {
-              <p class="muted">This order status is final and cannot be changed.</p>
+              <p class="muted">{{ 'This order status is final and cannot be changed.' | translate }}</p>
             }
           </section>
 
           <section class="card box">
-            <h2>Address & Payment</h2>
+            <h2>{{ 'Address & Payment' | translate }}</h2>
             <p>{{ o.address }}</p>
             <p class="muted">{{ o.governorate }}</p>
             <div style="margin-top: 12px; border-top: 1px solid var(--border-color); padding-top: 12px; display: flex; flex-direction: column; gap: 6px;">
-              <p><strong>طريقة الدفع / Payment Method:</strong> {{ getPaymentMethodLabel(o.paymentMethod) }}</p>
+              <p><strong>{{ 'Payment Method' | translate }}:</strong> {{ getPaymentMethodLabel(o.paymentMethod) | translate }}</p>
               <p>
-                <strong>حالة الدفع / Payment Status:</strong>
+                <strong>{{ 'Payment Status' | translate }}:</strong>
                 <span class="status-badge" [class.PAID]="o.paid" [class.UNPAID]="!o.paid" style="margin-inline-start: 6px;">
-                  {{ o.paid ? 'تم الدفع (Paid)' : 'لم يتم الدفع (Unpaid)' }}
+                  {{ (o.paid ? 'PAID' : 'UNPAID') | translate }}
                 </span>
               </p>
               @if (o.notes) {
-                <p style="margin-top: 4px;"><strong>ملاحظات العميل / Customer Notes:</strong> {{ o.notes }}</p>
+                <p style="margin-top: 4px;"><strong>{{ 'Customer Notes' | translate }}:</strong> {{ o.notes }}</p>
               }
             </div>
           </section>
         </div>
 
         <section class="card box">
-          <h2>Products</h2>
+          <h2>{{ 'Products' | translate }}</h2>
           @for (item of o.items; track item.productId) {
             <div class="line">
               <span>{{ item.productName }} × {{ item.quantity }}</span>
               <strong>{{ item.lineTotal }} EGP</strong>
             </div>
           }
-          <div class="line"><span>Shipping</span><strong>{{ o.shippingFee }} EGP</strong></div>
-          <div class="line total"><span>Total</span><strong>{{ o.total }} EGP</strong></div>
+          <div class="line"><span>{{ 'Shipping' | translate }}</span><strong>{{ o.shippingFee }} EGP</strong></div>
+          <div class="line total"><span>{{ 'Total' | translate }}</span><strong>{{ o.total }} EGP</strong></div>
         </section>
 
         <section class="card box">
-          <h2>Status History</h2>
+          <h2>{{ 'Status History' | translate }}</h2>
           @for (history of o.statusHistory; track history.createdAt) {
-            <p><strong>{{ history.status }}</strong> - {{ history.note }} - {{ history.createdAt | date:'short' }}</p>
+            <p><strong>{{ statusLabel(history.status) }}</strong> - {{ history.note }} - {{ history.createdAt | date:'short' }}</p>
           } @empty {
-            <p class="muted">No history yet.</p>
+            <p class="muted">{{ 'No history yet.' | translate }}</p>
           }
         </section>
       </section>
@@ -92,13 +93,12 @@ export class AdminOrderDetailsComponent implements OnInit {
   ngOnInit() { this.load(); }
 
   getPaymentMethodLabel(method?: string | null): string {
-    if (!method) return 'الدفع عند الاستلام (Cash on Delivery)';
-    const labels: Record<string, string> = {
-      CASH: 'الدفع عند الاستلام (Cash on Delivery)',
-      VISA: 'بطاقة ائتمان (Visa / Card)',
-      WALLET: 'محفظة إلكترونية (Mobile Wallet)'
-    };
-    return labels[method.toUpperCase()] || method;
+    if (!method) return 'CASH_PAYMENT';
+    const clean = method.toUpperCase();
+    if (clean === 'CASH') return 'CASH_PAYMENT';
+    if (clean === 'VISA') return 'VISA_PAYMENT';
+    if (clean === 'WALLET') return 'WALLET_PAYMENT';
+    return method;
   }
 
   load() {

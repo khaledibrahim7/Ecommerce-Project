@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ApiService } from '../core/api.service';
 import { Category, ContactLink, ElectronicInvoice, Expense, Order, Product, Question, Report, Review, ShippingGovernorate } from '../core/models';
 import { ToastService } from '../core/toast.service';
@@ -8,42 +9,42 @@ import { ToastService } from '../core/toast.service';
 type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | 'settings' | 'finance' | 'contact';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   template: `
     <section class="page admin">
       <div class="section-title admin-head">
         <div>
-          <h1>Sowar Dashboard</h1>
-          <p class="muted">Manage products, orders, shipping, and expenses from one place.</p>
+          <h1>{{ 'Sowar Dashboard' | translate }}</h1>
+          <p class="muted">{{ 'Manage products, orders, shipping, and expenses from one place' | translate }}.</p>
         </div>
       </div>
 
       <div class="tabs" role="tablist">
-        <button class="btn secondary" [class.active]="tab === 'overview'" (click)="tab='overview'">Overview</button>
-        <a class="btn secondary" routerLink="/admin/products">Products</a>
-        <button class="btn secondary" [class.active]="tab === 'orders'" (click)="tab='orders'">Orders</button>
-        <button class="btn secondary" [class.active]="tab === 'invoices'" (click)="tab='invoices'">Invoices</button>
-        <button class="btn secondary" [class.active]="tab === 'finance'" (click)="tab='finance'">Expenses</button>
-        <button class="btn secondary" [class.active]="tab === 'settings'" (click)="tab='settings'">Categories & Shipping</button>
-        <button class="btn secondary" [class.active]="tab === 'questions'" (click)="tab='questions'">Questions</button>
-        <button class="btn secondary" [class.active]="tab === 'reviews'" (click)="tab='reviews'">Reviews</button>
-        <button class="btn secondary" [class.active]="tab === 'contact'" (click)="tab='contact'">Contact</button>
+        <button class="btn secondary" [class.active]="tab === 'overview'" (click)="tab='overview'">{{ 'Overview' | translate }}</button>
+        <a class="btn secondary" routerLink="/admin/products">{{ 'Products' | translate }}</a>
+        <button class="btn secondary" [class.active]="tab === 'orders'" (click)="tab='orders'">{{ 'Orders' | translate }}</button>
+        <button class="btn secondary" [class.active]="tab === 'invoices'" (click)="tab='invoices'">{{ 'Invoices' | translate }}</button>
+        <button class="btn secondary" [class.active]="tab === 'finance'" (click)="tab='finance'">{{ 'Expenses' | translate }}</button>
+        <button class="btn secondary" [class.active]="tab === 'settings'" (click)="tab='settings'">{{ 'Categories & Shipping' | translate }}</button>
+        <button class="btn secondary" [class.active]="tab === 'questions'" (click)="tab='questions'">{{ 'Questions' | translate }}</button>
+        <button class="btn secondary" [class.active]="tab === 'reviews'" (click)="tab='reviews'">{{ 'Reviews' | translate }}</button>
+        <button class="btn secondary" [class.active]="tab === 'contact'" (click)="tab='contact'">{{ 'Contact' | translate }}</button>
       </div>
 
       @if (tab === 'overview') {
         <div class="metric-grid">
-          <div class="card metric tone-orders"><span>Total Orders</span><strong>{{ totalOrders(report()) }}</strong></div>
-          <div class="card metric tone-active"><span>Active Orders</span><strong>{{ activeOrders(report()) }}</strong></div>
-          <div class="card metric tone-cancelled"><span>Cancelled Orders</span><strong>{{ report()?.cancelledOrdersCount || 0 }}</strong></div>
-          <div class="card metric tone-sales"><span>Sales</span><strong>{{ money(report()?.revenue) }}</strong></div>
-          <div class="card metric tone-profit"><span>Net Profit</span><strong>{{ money(report()?.netProfit) }}</strong></div>
-          <div class="card metric tone-stock"><span>Low Stock</span><strong>{{ lowStock().length }}</strong></div>
+          <div class="card metric tone-orders"><span>{{ 'Total Orders' | translate }}</span><strong>{{ totalOrders(report()) }}</strong></div>
+          <div class="card metric tone-active"><span>{{ 'Active Orders' | translate }}</span><strong>{{ activeOrders(report()) }}</strong></div>
+          <div class="card metric tone-cancelled"><span>{{ 'Cancelled Orders' | translate }}</span><strong>{{ report()?.cancelledOrdersCount || 0 }}</strong></div>
+          <div class="card metric tone-sales"><span>{{ 'Sales' | translate }}</span><strong>{{ money(report()?.revenue) }}</strong></div>
+          <div class="card metric tone-profit"><span>{{ 'Net Profit' | translate }}</span><strong>{{ money(report()?.netProfit) }}</strong></div>
+          <div class="card metric tone-stock"><span>{{ 'Low Stock' | translate }}</span><strong>{{ lowStock().length }}</strong></div>
         </div>
       }
 
       @if (tab === 'orders') {
         <section class="card panel">
-          <h2>Orders</h2>
+          <h2>{{ 'Orders' | translate }}</h2>
           <div class="orders-grid">
             @for (order of orders(); track order.id) {
               <div class="order-card">
@@ -52,8 +53,8 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
                   <span class="status-badge {{ order.status }}">{{ statusLabel(order.status) }}</span>
                 </div>
                 <div class="order-body">
-                  <p><strong>Customer:</strong> {{ order.customerName }}</p>
-                  <p><strong>Total:</strong> {{ money(order.total) }}</p>
+                  <p><strong>{{ 'Customer' | translate }}:</strong> {{ order.customerName }}</p>
+                  <p><strong>{{ 'Total' | translate }}:</strong> {{ money(order.total) }}</p>
                   <div class="order-actions">
                     <select [ngModel]="order.status" [disabled]="isFinalStatus(order.status)" (ngModelChange)="updateStatus(order, $event, statusNote.value)">
                       <option [value]="order.status">{{ statusLabel(order.status) }}</option>
@@ -61,12 +62,12 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
                         <option [value]="next">{{ statusLabel(next) }}</option>
                       }
                     </select>
-                    <input #statusNote placeholder="Status note">
+                    <input #statusNote [placeholder]="'Status note' | translate">
                   </div>
                 </div>
               </div>
             } @empty {
-              <p>No orders found.</p>
+              <p>{{ 'No orders found.' | translate }}</p>
             }
           </div>
         </section>
@@ -74,38 +75,38 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
 
       @if (tab === 'contact') {
         <section class="card panel">
-          <h2>Contact Links</h2>
+          <h2>{{ 'Contact Links' | translate }}</h2>
           <div class="inline-form">
             <select [(ngModel)]="contactForm.platform">
-              <option value="WHATSAPP">WhatsApp</option>
-              <option value="INSTAGRAM">Instagram</option>
-              <option value="FACEBOOK">Facebook</option>
-              <option value="TIKTOK">TikTok</option>
-              <option value="EMAIL">Email</option>
-              <option value="PHONE">Phone</option>
+              <option value="WHATSAPP">{{ 'WhatsApp' | translate }}</option>
+              <option value="INSTAGRAM">{{ 'Instagram' | translate }}</option>
+              <option value="FACEBOOK">{{ 'Facebook' | translate }}</option>
+              <option value="TIKTOK">{{ 'TikTok' | translate }}</option>
+              <option value="EMAIL">{{ 'Email' | translate }}</option>
+              <option value="PHONE">{{ 'Phone' | translate }}</option>
             </select>
-            <input [(ngModel)]="contactForm.value" placeholder="Link, phone, or email">
-            <button class="btn" (click)="saveContact()">Save</button>
+            <input [(ngModel)]="contactForm.value" [placeholder]="'Link, phone, or email' | translate">
+            <button class="btn" (click)="saveContact()">{{ 'Save' | translate }}</button>
           </div>
           @for (link of contactLinks(); track link.id) {
             <div class="row">
               <span>{{ platformLabel(link.platform) }} - {{ link.value }}</span>
               <span>
-                <button class="btn secondary" (click)="editContact(link)">Edit</button>
-                <button class="btn danger" (click)="deleteContact(link.id!)">Delete</button>
+                <button class="btn secondary" (click)="editContact(link)">{{ 'Edit' | translate }}</button>
+                <button class="btn danger" (click)="deleteContact(link.id!)">{{ 'Delete' | translate }}</button>
               </span>
             </div>
           } @empty {
-            <p class="empty">No contact links yet.</p>
+            <p class="empty">{{ 'No contact links yet.' | translate }}</p>
           }
         </section>
       }
 
       @if (tab === 'invoices') {
         <section class="card panel">
-          <h2>Electronic Invoices</h2>
+          <h2>{{ 'Electronic Invoices' | translate }}</h2>
           <table>
-            <thead><tr><th>Invoice</th><th>Order</th><th>Total</th><th>Status</th><th>Portal Ref</th><th>Note</th><th>Print</th></tr></thead>
+            <thead><tr><th>{{ 'Invoice' | translate }}</th><th>{{ 'Order' | translate }}</th><th>{{ 'Total' | translate }}</th><th>{{ 'Status' | translate }}</th><th>{{ 'Portal Ref' | translate }}</th><th>{{ 'Note' | translate }}</th><th>{{ 'Print' | translate }}</th></tr></thead>
             <tbody>
               @for (invoice of invoices(); track invoice.id) {
                 <tr>
@@ -115,10 +116,10 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
                   <td><span class="status-badge {{ invoice.status }}">{{ invoiceStatusLabel(invoice.status) }}</span></td>
                   <td>{{ invoice.portalReference || '-' }}</td>
                   <td>{{ invoice.errorMessage || '-' }}</td>
-                  <td><a class="btn secondary" [routerLink]="['/admin/orders', invoice.orderId, 'receipt']">Receipt</a></td>
+                  <td><a class="btn secondary" [routerLink]="['/admin/orders', invoice.orderId, 'receipt']">{{ 'Receipt' | translate }}</a></td>
                 </tr>
               } @empty {
-                <tr><td colspan="7">No invoices yet.</td></tr>
+                <tr><td colspan="7">{{ 'No invoices yet.' | translate }}</td></tr>
               }
             </tbody>
           </table>
@@ -127,36 +128,36 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
 
       @if (tab === 'questions') {
         <section class="card panel">
-          <h2>Customer Questions</h2>
+          <h2>{{ 'Customer Questions' | translate }}</h2>
           @for (question of questions(); track question.id) {
             <div class="question-row">
               <div>
                 <strong>{{ question.question }}</strong>
-                <p class="muted">{{ question.customerName || 'Customer' }} - {{ productName(question) }}</p>
+                <p class="muted">{{ question.customerName || ('Customer' | translate) }} - {{ productName(question) }}</p>
                 @if (question.answer) { <p>{{ question.answer }}</p> }
               </div>
               <div>
-                <textarea #answer [placeholder]="question.answer || 'Write an answer'"></textarea>
-                <button class="btn" (click)="answerQuestion(question.id, answer.value)">Reply</button>
+                <textarea #answer [placeholder]="'Write an answer' | translate"></textarea>
+                <button class="btn" (click)="answerQuestion(question.id, answer.value)">{{ 'Reply' | translate }}</button>
               </div>
             </div>
           } @empty {
-            <p class="empty">No questions yet.</p>
+            <p class="empty">{{ 'No questions yet.' | translate }}</p>
           }
         </section>
       }
 
       @if (tab === 'reviews') {
         <section class="card panel">
-          <h2>Reviews</h2>
+          <h2>{{ 'Reviews' | translate }}</h2>
           @for (review of reviews(); track review.id) {
             <div class="row">
               <span>{{ review.customerName }} - {{ review.rating }}/5 - {{ productName(review) }}</span>
-              <span><button class="btn danger" (click)="deleteReview(review.id)">Delete</button></span>
+              <span><button class="btn danger" (click)="deleteReview(review.id)">{{ 'Delete' | translate }}</button></span>
             </div>
             @if (review.comment) { <p class="muted">{{ review.comment }}</p> }
           } @empty {
-            <p class="empty">No reviews yet.</p>
+            <p class="empty">{{ 'No reviews yet.' | translate }}</p>
           }
         </section>
       }
@@ -164,36 +165,36 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       @if (tab === 'settings') {
         <div class="layout">
           <section class="card panel">
-            <h2>Categories</h2>
+            <h2>{{ 'Categories' | translate }}</h2>
             <div class="inline-form">
-              <input [(ngModel)]="categoryForm.name" placeholder="Category Name">
-              <input [(ngModel)]="categoryForm.description" placeholder="Description">
-              <button class="btn" (click)="saveCategory()">Save</button>
+              <input [(ngModel)]="categoryForm.name" [placeholder]="'Category Name' | translate">
+              <input [(ngModel)]="categoryForm.description" [placeholder]="'Description' | translate">
+              <button class="btn" (click)="saveCategory()">{{ 'Save' | translate }}</button>
             </div>
             @for (category of categories(); track category.id) {
               <div class="row">
                 <span>{{ category.name }}</span>
                 <span>
-                  <button class="btn secondary" (click)="editCategory(category)">Edit</button>
-                  <button class="btn danger" (click)="deleteCategory(category.id)">Delete</button>
+                  <button class="btn secondary" (click)="editCategory(category)">{{ 'Edit' | translate }}</button>
+                  <button class="btn danger" (click)="deleteCategory(category.id)">{{ 'Delete' | translate }}</button>
                 </span>
               </div>
             }
           </section>
 
           <section class="card panel">
-            <h2>Shipping</h2>
+            <h2>{{ 'Shipping' | translate }}</h2>
             <div class="inline-form">
-              <input [(ngModel)]="governorateForm.name" placeholder="Governorate">
-              <input type="number" [(ngModel)]="governorateForm.shippingFee" placeholder="Shipping Fee">
-              <button class="btn" (click)="saveGovernorate()">Save</button>
+              <input [(ngModel)]="governorateForm.name" [placeholder]="'Governorate' | translate">
+              <input type="number" [(ngModel)]="governorateForm.shippingFee" [placeholder]="'Shipping Fee' | translate">
+              <button class="btn" (click)="saveGovernorate()">{{ 'Save' | translate }}</button>
             </div>
             @for (gov of governorates(); track gov.id) {
               <div class="row">
                 <span>{{ gov.name }} - {{ money(gov.shippingFee) }}</span>
                 <span>
-                  <button class="btn secondary" (click)="editGovernorate(gov)">Edit</button>
-                  <button class="btn danger" (click)="deleteGovernorate(gov.id)">Delete</button>
+                  <button class="btn secondary" (click)="editGovernorate(gov)">{{ 'Edit' | translate }}</button>
+                  <button class="btn danger" (click)="deleteGovernorate(gov.id)">{{ 'Delete' | translate }}</button>
                 </span>
               </div>
             }
@@ -203,18 +204,18 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
 
       @if (tab === 'finance') {
         <section class="card panel">
-          <h2>Expenses</h2>
+          <h2>{{ 'Expenses' | translate }}</h2>
           <div class="inline-form">
-            <input [(ngModel)]="expenseForm.title" placeholder="Title">
-            <input type="number" [(ngModel)]="expenseForm.amount" placeholder="Amount">
-            <button class="btn" (click)="saveExpense()">Save</button>
+            <input [(ngModel)]="expenseForm.title" [placeholder]="'Title' | translate">
+            <input type="number" [(ngModel)]="expenseForm.amount" [placeholder]="'Amount' | translate">
+            <button class="btn" (click)="saveExpense()">{{ 'Save' | translate }}</button>
           </div>
           @for (expense of expenses(); track expense.id) {
             <div class="row">
               <span>{{ expense.title }} - {{ money(expense.amount) }}</span>
               <span>
-                <button class="btn secondary" (click)="editExpense(expense)">Edit</button>
-                <button class="btn danger" (click)="deleteExpense(expense.id)">Delete</button>
+                <button class="btn secondary" (click)="editExpense(expense)">{{ 'Edit' | translate }}</button>
+                <button class="btn danger" (click)="deleteExpense(expense.id)">{{ 'Delete' | translate }}</button>
               </span>
             </div>
           }
@@ -227,8 +228,8 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
             <h3>{{ dialog.title }}</h3>
             <p>{{ dialog.message }}</p>
             <div class="modal-actions">
-              <button class="btn secondary" (click)="confirmDialog.set(null)">Cancel</button>
-              <button class="btn danger" (click)="dialog.action(); confirmDialog.set(null)">Confirm</button>
+              <button class="btn secondary" (click)="confirmDialog.set(null)">{{ 'Cancel' | translate }}</button>
+              <button class="btn danger" (click)="dialog.action(); confirmDialog.set(null)">{{ 'Confirm' | translate }}</button>
             </div>
           </div>
         </div>

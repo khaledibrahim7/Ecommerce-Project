@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, Inject, effect } from '@angular/core';
+import { Component, OnInit, signal, Inject, effect, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgIf, DOCUMENT } from '@angular/common';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
@@ -24,22 +24,25 @@ import { ToastService } from './core/toast.service';
 
         <nav aria-label="Main Menu">
           @if (auth.isAdmin() && !isPreview()) {
-            <a routerLink="/admin" routerLinkActive="active">Dashboard</a>
-            <a routerLink="/preview/products" routerLinkActive="active">Preview Store</a>
+            <a routerLink="/admin" routerLinkActive="active">{{ 'Dashboard' | translate }}</a>
+            <a routerLink="/preview/products" routerLinkActive="active">{{ 'Preview Store' | translate }}</a>
           } @else {
-            <a [routerLink]="isPreview() ? '/preview/products' : '/products'" routerLinkActive="active">Products</a>
+            <a [routerLink]="isPreview() ? '/preview/products' : '/products'" routerLinkActive="active">{{ 'Products' | translate }}</a>
             @if (!isPreview()) {
-              <a routerLink="/wishlist" routerLinkActive="active">Wishlist</a>
-              <a routerLink="/orders" routerLinkActive="active">My Orders</a>
+              <a routerLink="/wishlist" routerLinkActive="active">{{ 'Wishlist' | translate }}</a>
+              <a routerLink="/orders" routerLinkActive="active">{{ 'My Orders' | translate }}</a>
             }
           }
         </nav>
 
         <div class="actions">
           <!-- Language Switcher -->
-          <div class="language-switcher">
-            <button type="button" [class.active]="translate.currentLang() === 'en'" (click)="switchLanguage('en')">EN</button>
-            <button type="button" [class.active]="translate.currentLang() === 'ar' || !translate.currentLang()" (click)="switchLanguage('ar')">AR</button>
+          <div class="language-switcher-single">
+            @if (translate.currentLang() === 'ar' || !translate.currentLang()) {
+              <button type="button" class="lang-toggle-btn" (click)="switchLanguage('en')">EN</button>
+            } @else {
+              <button type="button" class="lang-toggle-btn" (click)="switchLanguage('ar')">AR</button>
+            }
           </div>
           <!-- Theme Toggle Button -->
           <button class="theme-toggle" type="button" (click)="toggleTheme()" aria-label="Toggle Theme">
@@ -64,8 +67,8 @@ import { ToastService } from './core/toast.service';
               @if (notificationsOpen()) {
                 <div class="notification-menu">
                   <div class="notification-head">
-                    <strong>Notifications</strong>
-                    <button type="button" (click)="markAllRead()">Mark all as read</button>
+                    <strong>{{ 'Notifications' | translate }}</strong>
+                    <button type="button" (click)="markAllRead()">{{ 'Mark all as read' | translate }}</button>
                   </div>
                   @for (notification of notifications(); track notification.id) {
                     <button class="notification-item" [class.unread]="!notification.read" type="button" (click)="openNotification(notification)">
@@ -73,15 +76,21 @@ import { ToastService } from './core/toast.service';
                       <span>{{ notification.message }}</span>
                     </button>
                   } @empty {
-                    <p class="notification-empty">No notifications.</p>
+                    <p class="notification-empty">{{ 'No notifications.' | translate }}</p>
                   }
                 </div>
               }
             </div>
           }
           @if (auth.isAdmin() && isPreview()) {
-            <a routerLink="/admin" class="back-to-dashboard">Back to Dashboard</a>
+            <a routerLink="/admin" class="back-to-dashboard">{{ 'Back to Dashboard' | translate }}</a>
           } @else if (auth.isLoggedIn()) {
+            @if (!isAdminPage()) {
+              <a routerLink="/cart" class="cart" aria-label="Cart" title="Cart">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1" fill="currentColor"/><circle cx="18" cy="20" r="1" fill="currentColor"/></svg>
+                <span class="cart-count">{{ cartCount() }}</span>
+              </a>
+            }
             <a routerLink="/profile" class="profile-btn" aria-label="My Account" title="My Account">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -95,12 +104,10 @@ import { ToastService } from './core/toast.service';
                 <line x1="21" y1="12" x2="9" y2="12"/>
               </svg>
             </a>
-            <a routerLink="/cart" class="cart" aria-label="Cart" title="Cart">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1" fill="currentColor"/><circle cx="18" cy="20" r="1" fill="currentColor"/></svg>
-              <span class="cart-count">{{ cartCount() }}</span>
-            </a>
           } @else {
-            <a routerLink="/login" class="login">Login</a>
+            @if (!isLoginPage()) {
+              <a routerLink="/login" class="login">{{ 'Login' | translate }}</a>
+            }
           }
         </div>
       </header>
@@ -115,29 +122,29 @@ import { ToastService } from './core/toast.service';
       <div class="mega-inner">
         <button class="close-btn" type="button" (click)="toggleNav()">×</button>
 
-        <h3>Menu</h3>
+        <h3>{{ 'Menu' | translate }}</h3>
         <nav class="menu-list">
           @if (auth.isAdmin() && !isPreview()) {
-            <a routerLink="/admin" routerLinkActive="active" (click)="toggleNav()">Dashboard</a>
-            <a routerLink="/preview/products" routerLinkActive="active" (click)="toggleNav()">Preview Store</a>
+            <a routerLink="/admin" routerLinkActive="active" (click)="toggleNav()">{{ 'Dashboard' | translate }}</a>
+            <a routerLink="/preview/products" routerLinkActive="active" (click)="toggleNav()">{{ 'Preview Store' | translate }}</a>
           } @else {
-            <a [routerLink]="isPreview() ? '/preview/products' : '/products'" routerLinkActive="active" (click)="toggleNav()">Products</a>
+            <a [routerLink]="isPreview() ? '/preview/products' : '/products'" routerLinkActive="active" (click)="toggleNav()">{{ 'Products' | translate }}</a>
             @if (!isPreview()) {
-              <a routerLink="/wishlist" routerLinkActive="active" (click)="toggleNav()">Wishlist</a>
-              <a routerLink="/orders" routerLinkActive="active" (click)="toggleNav()">My Orders</a>
+              <a routerLink="/wishlist" routerLinkActive="active" (click)="toggleNav()">{{ 'Wishlist' | translate }}</a>
+              <a routerLink="/orders" routerLinkActive="active" (click)="toggleNav()">{{ 'My Orders' | translate }}</a>
             }
           }
           @if (auth.isLoggedIn()) {
-            <a routerLink="/profile" (click)="toggleNav()">My Account</a>
-            <a routerLink="/logout" (click)="toggleNav()">Logout</a>
+            <a routerLink="/profile" (click)="toggleNav()">{{ 'My Account' | translate }}</a>
+            <a routerLink="/logout" (click)="toggleNav()">{{ 'Logout' | translate }}</a>
           } @else {
-            <a routerLink="/login" (click)="toggleNav()">Login</a>
+            <a routerLink="/login" (click)="toggleNav()">{{ 'Login' | translate }}</a>
           }
         </nav>
 
-        <h3>Quick Support</h3>
+        <h3>{{ 'Quick Support' | translate }}</h3>
         <nav class="menu-list">
-          <a href="javascript:void(0)" (click)="toggleNav(); toggleContact()">Contact Us</a>
+          <a href="javascript:void(0)" (click)="toggleNav(); toggleContact()">{{ 'Contact Us' | translate }}</a>
         </nav>
       </div>
     </div>
@@ -149,41 +156,41 @@ import { ToastService } from './core/toast.service';
         <!-- Column 1: Brand & Description -->
         <div class="footer-column brand-col">
           <strong class="footer-logo">Sowar</strong>
-          <p class="footer-desc">سوار للعسل الطبيعي - عسل نقي 100%، سهولة في الطلب، وشحن سريع لكافة المحافظات.</p>
+          <p class="footer-desc">{{ 'Sowar Natural Honey Description' | translate }}</p>
           <div class="footer-socials">
             <button class="social-btn" (click)="toggleContact()" aria-label="Support">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span>تواصل معنا</span>
+              <span>{{ 'Contact Us' | translate }}</span>
             </button>
           </div>
         </div>
 
         <!-- Column 2: Quick Links -->
         <div class="footer-column">
-          <h4>تسوق</h4>
+          <h4>{{ 'Shop' | translate }}</h4>
           <ul class="footer-links">
-            <li><a routerLink="/products">المنتجات</a></li>
+            <li><a routerLink="/products">{{ 'Products' | translate }}</a></li>
             @if (!isPreview()) {
-              <li><a routerLink="/cart">عربة التسوق</a></li>
-              <li><a routerLink="/wishlist">قائمة الأمنيات</a></li>
+              <li><a routerLink="/cart">{{ 'Shopping Cart' | translate }}</a></li>
+              <li><a routerLink="/wishlist">{{ 'Wishlist' | translate }}</a></li>
             }
           </ul>
         </div>
 
         <!-- Column 3: My Account / Support -->
         <div class="footer-column">
-          <h4>حسابي</h4>
+          <h4>{{ 'My Account' | translate }}</h4>
           <ul class="footer-links">
             @if (auth.isAdmin() && !isPreview()) {
-              <li><a routerLink="/admin">لوحة التحكم</a></li>
+              <li><a routerLink="/admin">{{ 'Dashboard' | translate }}</a></li>
             } @else {
               @if (auth.isLoggedIn()) {
-                <li><a routerLink="/profile">حسابي الشخصي</a></li>
-                <li><a routerLink="/orders">طلباتي</a></li>
-                <li><a routerLink="/logout">تسجيل الخروج</a></li>
+                <li><a routerLink="/profile">{{ 'Personal Profile' | translate }}</a></li>
+                <li><a routerLink="/orders">{{ 'My Orders' | translate }}</a></li>
+                <li><a routerLink="/logout">{{ 'Logout' | translate }}</a></li>
               } @else {
-                <li><a routerLink="/login">تسجيل الدخول</a></li>
-                <li><a routerLink="/register">إنشاء حساب</a></li>
+                <li><a routerLink="/login">{{ 'Login' | translate }}</a></li>
+                <li><a routerLink="/register">{{ 'Create Account' | translate }}</a></li>
               }
             }
           </ul>
@@ -191,7 +198,7 @@ import { ToastService } from './core/toast.service';
       </div>
 
       <div class="footer-bottom">
-        <p class="copyright">© 2026 Sowar. جميع الحقوق محفوظة.</p>
+        <p class="copyright">{{ 'Copyright © 2026 Sowar. All rights reserved.' | translate }}</p>
       </div>
     </footer>
     }
@@ -331,6 +338,10 @@ export class AppComponent implements OnInit {
     return this.router.url.startsWith('/preview');
   }
 
+  isAdminPage() {
+    return this.router.url.startsWith('/admin');
+  }
+
   toggleNotifications() {
     this.notificationsOpen.update(value => !value);
     if (this.notificationsOpen()) this.loadNotifications();
@@ -339,8 +350,9 @@ export class AppComponent implements OnInit {
   loadNotifications() {
     if (!this.auth.isLoggedIn()) return;
     this.api.notifications().subscribe(notifications => {
-      this.notifications.set(notifications.slice(0, 8));
-      this.unreadCount.set(notifications.filter(item => !item.read).length);
+      const unread = notifications.filter(item => !item.read);
+      this.notifications.set(unread.slice(0, 8));
+      this.unreadCount.set(unread.length);
     });
   }
 
@@ -354,12 +366,24 @@ export class AppComponent implements OnInit {
     if (notification.targetUrl) this.router.navigateByUrl(notification.targetUrl);
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.notifications')) {
+      this.notificationsOpen.set(false);
+    }
+  }
+
   toggleNav() {
     this.navOpen.update(v => !v);
   }
 
   toggleContact() {
     this.contactOpen.update(v => !v);
+  }
+
+  isLoginPage() {
+    return this.router.url.startsWith('/login');
   }
 
   contactHref(link: ContactLink) {

@@ -10,7 +10,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 @Component({
   imports: [RouterLink, ProductCardComponent, TranslatePipe],
   template: `
-    <section class="hero" style="background-image: linear-gradient(to right, rgba(12, 9, 6, 0.2) 0%, rgba(12, 9, 6, 0.7) 100%), url('/user-honey.jpg'); background-size: cover; background-position: center;">
+    <section class="hero" style="background-image: linear-gradient(to right, rgba(12, 9, 6, 0.2) 0%, rgba(12, 9, 6, 0.7) 100%), url('/sowar-honey-banner.png'); background-size: cover; background-position: center;">
       <div class="hero-content">
         <h1>{{ 'Sowar Natural Honey' | translate }}</h1>
         <p>{{ 'Discover the purity of nature in every spoonful. Our authentic honey products offer a unique experience of quality and unforgettable taste.' | translate }}</p>

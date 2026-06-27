@@ -4,52 +4,53 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { Category, Product } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   template: `
     <section class="page admin-products">
       <div class="section-title">
         <div>
-          <h1>Product Management</h1>
-          <p class="muted">Add and edit products, images, and offers from a dedicated page.</p>
+          <h1>{{ 'Product Management' | translate }}</h1>
+          <p class="muted">{{ 'Add and edit products, images, and offers from a dedicated page.' | translate }}</p>
         </div>
         <div class="actions-row">
-          <a class="btn secondary" routerLink="/admin">Dashboard</a>
-          <a class="btn" routerLink="/products">Preview Store</a>
+          <a class="btn secondary" routerLink="/admin">{{ 'Dashboard' | translate }}</a>
+          <a class="btn" routerLink="/products">{{ 'Preview Store' | translate }}</a>
         </div>
       </div>
 
       <section class="card panel">
-        <h2>{{ productForm.id ? 'Edit Product' : 'Add Product' }}</h2>
-        <h3>Basic Information</h3>
+        <h2>{{ (productForm.id ? 'Edit Product' : 'Add Product') | translate }}</h2>
+        <h3>{{ 'Basic Information' | translate }}</h3>
         <div class="form-grid">
-          <label>Product Name <input [(ngModel)]="productForm.name"></label>
-          <label>Category
+          <label>{{ 'Product Name' | translate }} <input [(ngModel)]="productForm.name"></label>
+          <label>{{ 'Category' | translate }}
             <select [(ngModel)]="productForm.categoryId">
-              <option [ngValue]="undefined">Select Category</option>
+              <option [ngValue]="undefined">{{ 'Select Category' | translate }}</option>
               @for (category of categories(); track category.id) {
                 <option [ngValue]="category.id">{{ category.name }}</option>
               }
             </select>
           </label>
-          <label>Price for Customer <input type="number" [(ngModel)]="productForm.price" (ngModelChange)="onPriceChange()"></label>
-          <label>Product Cost <input type="number" [(ngModel)]="productForm.cost"></label>
-          <label>Stock <input type="number" [(ngModel)]="productForm.stockQuantity"></label>
-          <label>Low Stock Threshold <input type="number" [(ngModel)]="productForm.lowStockThreshold"></label>
-          <label>Weight <input [(ngModel)]="productForm.weight"></label>
-          <label>Origin <input [(ngModel)]="productForm.origin"></label>
-          <label class="check"><input type="checkbox" [(ngModel)]="productForm.featured"> Featured on Homepage</label>
-          <label class="check"><input type="checkbox" [(ngModel)]="productForm.active"> Visible to Customers</label>
-          <label class="full">Description <textarea [(ngModel)]="productForm.description"></textarea></label>
-          <label class="full">Ingredients <textarea [(ngModel)]="productForm.ingredients"></textarea></label>
-          <label class="full">Usage Instructions <textarea [(ngModel)]="productForm.usageInstructions"></textarea></label>
-          <label class="full">Storage Instructions <textarea [(ngModel)]="productForm.storageInstructions"></textarea></label>
+          <label>{{ 'Price for Customer' | translate }} <input type="number" [(ngModel)]="productForm.price" (ngModelChange)="onPriceChange()"></label>
+          <label>{{ 'Product Cost' | translate }} <input type="number" [(ngModel)]="productForm.cost"></label>
+          <label>{{ 'Stock' | translate }} <input type="number" [(ngModel)]="productForm.stockQuantity"></label>
+          <label>{{ 'Low Stock Threshold' | translate }} <input type="number" [(ngModel)]="productForm.lowStockThreshold"></label>
+          <label>{{ 'Weight' | translate }} <input [(ngModel)]="productForm.weight"></label>
+          <label>{{ 'Origin' | translate }} <input [(ngModel)]="productForm.origin"></label>
+          <label class="check"><input type="checkbox" [(ngModel)]="productForm.featured"> {{ 'Featured on Homepage' | translate }}</label>
+          <label class="check"><input type="checkbox" [(ngModel)]="productForm.active"> {{ 'Visible to Customers' | translate }}</label>
+          <label class="full">{{ 'Description' | translate }} <textarea [(ngModel)]="productForm.description"></textarea></label>
+          <label class="full">{{ 'Ingredients' | translate }} <textarea [(ngModel)]="productForm.ingredients"></textarea></label>
+          <label class="full">{{ 'Usage Instructions' | translate }} <textarea [(ngModel)]="productForm.usageInstructions"></textarea></label>
+          <label class="full">{{ 'Storage Instructions' | translate }} <textarea [(ngModel)]="productForm.storageInstructions"></textarea></label>
         </div>
 
-        <h3>Images</h3>
+        <h3>{{ 'Images' | translate }}</h3>
         <label class="upload-box">
-          Add product images
+          {{ 'Add product images' | translate }}
           <input type="file" accept="image/*" multiple (change)="uploadProductImages($event)">
         </label>
         @if ((productForm.imageUrls || []).length) {
@@ -57,31 +58,31 @@ import { ToastService } from '../core/toast.service';
             @for (image of productForm.imageUrls; track image) {
               <div class="image-chip">
                 <img [src]="imageUrl(image)" alt="Product Image">
-                <button class="btn danger" type="button" (click)="removeImage(image)">Delete</button>
+                <button class="btn danger" type="button" (click)="removeImage(image)">{{ 'Delete' | translate }}</button>
               </div>
             }
           </div>
         }
 
-        <h3>Offer</h3>
+        <h3>{{ 'Offer' | translate }}</h3>
         <div class="form-grid">
-          <label>Offer Type
+          <label>{{ 'Offer Type' | translate }}
             <select [(ngModel)]="productForm.promotionType" (ngModelChange)="onPromotionChange()">
-              <option value="NONE">No Offer</option>
-              <option value="DISCOUNT">Price Discount</option>
-              <option value="GIFT_PRODUCT">Gift Product</option>
+              <option value="NONE">{{ 'No Offer' | translate }}</option>
+              <option value="DISCOUNT">{{ 'Price Discount' | translate }}</option>
+              <option value="GIFT_PRODUCT">{{ 'Gift Product' | translate }}</option>
             </select>
           </label>
            @if (productForm.promotionType === 'DISCOUNT') {
-             <label>Price Before Discount <input type="number" [(ngModel)]="productForm.originalPrice" (ngModelChange)="onOriginalPriceChange()"></label>
-             <label>Discount Percent % <input type="number" min="0" max="100" [(ngModel)]="productForm.discountPercent" (ngModelChange)="onDiscountPercentChange()" placeholder="e.g., 15"></label>
-             <label>Offer Title <input [(ngModel)]="productForm.promotionTitle" placeholder="e.g., 15% Off"></label>
-             <label class="full">Offer Description <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
+             <label>{{ 'Price Before Discount' | translate }} <input type="number" [(ngModel)]="productForm.originalPrice" (ngModelChange)="onOriginalPriceChange()"></label>
+             <label>{{ 'Discount Percent %' | translate }} <input type="number" min="0" max="100" [(ngModel)]="productForm.discountPercent" (ngModelChange)="onDiscountPercentChange()" [placeholder]="'e.g., 15' | translate"></label>
+             <label>{{ 'Offer Title' | translate }} <input [(ngModel)]="productForm.promotionTitle" [placeholder]="'e.g., 15% Off' | translate"></label>
+             <label class="full">{{ 'Offer Description' | translate }} <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
            }
           @if (productForm.promotionType === 'GIFT_PRODUCT') {
-            <label>Gift Product
+            <label>{{ 'Gift Product' | translate }}
               <select [(ngModel)]="productForm.giftProductId">
-                <option [ngValue]="undefined">Select Gift Product</option>
+                <option [ngValue]="undefined">{{ 'Select Gift Product' | translate }}</option>
                 @for (product of products(); track product.id) {
                   @if (product.id !== productForm.id) {
                     <option [ngValue]="product.id">{{ product.name }}</option>
@@ -89,20 +90,20 @@ import { ToastService } from '../core/toast.service';
                 }
               </select>
             </label>
-            <label>Gift Quantity <input type="number" min="1" [(ngModel)]="productForm.giftQuantity"></label>
-            <label>Offer Title <input [(ngModel)]="productForm.promotionTitle" placeholder="e.g., Buy One Get One Free"></label>
-            <label class="full">Offer Description <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
+            <label>{{ 'Gift Quantity' | translate }} <input type="number" min="1" [(ngModel)]="productForm.giftQuantity"></label>
+            <label>{{ 'Offer Title' | translate }} <input [(ngModel)]="productForm.promotionTitle" [placeholder]="'e.g., Buy One Get One Free' | translate"></label>
+            <label class="full">{{ 'Offer Description' | translate }} <textarea [(ngModel)]="productForm.promotionDescription"></textarea></label>
           }
         </div>
 
         <div class="actions-row">
-          <button class="btn" (click)="saveProduct()">Save Product</button>
-          <button class="btn secondary" (click)="resetProduct()">{{ productForm.id ? 'Cancel Edit' : 'New Product' }}</button>
+          <button class="btn" (click)="saveProduct()">{{ 'Save Product' | translate }}</button>
+          <button class="btn secondary" (click)="resetProduct()">{{ (productForm.id ? 'Cancel Edit' : 'New Product') | translate }}</button>
         </div>
       </section>
 
       <section class="card panel">
-        <h2>Product List</h2>
+        <h2>{{ 'Product List' | translate }}</h2>
         <div class="product-grid">
           @for (product of products(); track product.id) {
             <div class="product-card">
@@ -116,18 +117,18 @@ import { ToastService } from '../core/toast.service';
                   }
                   <strong>{{ money(product.price) }}</strong>
                 </div>
-                <p>Cost: {{ money(product.cost) }}</p>
-                <p>Stock: {{ product.stockQuantity }}</p>
-                <p>Offer: {{ offerLabel(product) }}</p>
-                <p>Status: <span class="pill" [class.warn]="product.lowStock">{{ product.active ? 'Visible' : 'Disabled' }}</span></p>
+                <p>{{ 'Product Cost' | translate }}: {{ money(product.cost) }}</p>
+                <p>{{ 'Stock' | translate }}: {{ product.stockQuantity }}</p>
+                <p>{{ 'Offer' | translate }}: {{ offerLabel(product) }}</p>
+                <p>{{ 'Status' | translate }}: <span class="pill" [class.warn]="product.lowStock">{{ (product.active ? 'Visible' : 'Disabled') | translate }}</span></p>
               </div>
               <div class="product-actions">
-                <button class="btn secondary" (click)="edit(product)">Edit</button>
-                <button class="btn danger" (click)="deleteProduct(product.id)">Disable</button>
+                <button class="btn secondary" (click)="edit(product)">{{ 'Edit' | translate }}</button>
+                <button class="btn danger" (click)="deleteProduct(product.id)">{{ 'Disable' | translate }}</button>
               </div>
             </div>
           } @empty {
-            <p>No products found.</p>
+            <p>{{ 'No products found.' | translate }}</p>
           }
         </div>
       </section>

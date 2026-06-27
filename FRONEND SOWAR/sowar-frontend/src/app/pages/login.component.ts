@@ -4,40 +4,40 @@ import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { LoginType } from '../core/models';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   template: `
     <div class="page login-container fade-in">
       <div class="card login-card">
         <div class="login-card__header">
-          <h1>Login</h1>
-          <p class="muted">Welcome back! Log in to continue.</p>
+          <h1>{{ 'LoginTitle' | translate }}</h1>
+          <p class="muted">{{ 'LoginSubtitle' | translate }}</p>
         </div>
 
         <form #form="ngForm" (ngSubmit)="submit()" class="login-form">
           <label>
-            Email or Phone Number
-            <input name="identifier" [(ngModel)]="identifier" required [placeholder]="loginType === 'EMAIL' ? 'email@example.com' : '01...'">
+            {{ (loginType === 'EMAIL' ? 'Email' : 'PhoneNumber') | translate }}
+            <input name="identifier" [(ngModel)]="identifier" required [placeholder]="(loginType === 'EMAIL' ? 'EmailPlaceholder' : 'PhonePlaceholder') | translate">
           </label>
 
           <div class="login-type-toggle">
-            <label>
-              <input type="radio" name="loginType" value="EMAIL" [(ngModel)]="loginType">
-              <span>Email</span>
-            </label>
-            <label>
-              <input type="radio" name="loginType" value="PHONE" [(ngModel)]="loginType">
-              <span>Phone Number</span>
-            </label>
+            <button type="button" class="link-btn" (click)="toggleLoginType()">{{ (loginType === 'EMAIL' ? 'UsePhoneInstead' : 'UseEmailInstead') | translate }}</button>
           </div>
 
-          <label class="password-field">
-            Password
-            <input [type]="passwordVisible ? 'text' : 'password'" name="password" [(ngModel)]="password" required>
-            <span class="password-field__toggle" (click)="passwordVisible = !passwordVisible">
-              <!-- SVG icons here -->
-            </span>
+          <label>
+            {{ 'Password' | translate }}
+            <div class="password-input-wrapper">
+              <input [type]="passwordVisible ? 'text' : 'password'" name="password" [(ngModel)]="password" required [placeholder]="'PasswordPlaceholder' | translate">
+              <span class="password-field__toggle" (click)="passwordVisible = !passwordVisible">
+                @if (passwordVisible) {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                } @else {
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                }
+              </span>
+            </div>
           </label>
 
           @if (error) {
@@ -46,11 +46,11 @@ import { LoginType } from '../core/models';
             </div>
           }
 
-          <button type="submit" class="btn" [disabled]="form.invalid">Login</button>
+          <button type="submit" class="btn" [disabled]="form.invalid">{{ 'Login' | translate }}</button>
         </form>
 
-        <div class="divider">OR</div>
-        <a routerLink="/register" class="btn secondary" style="width: 100%;">Create a new account</a>
+        <div class="divider">{{ 'OR' | translate }}</div>
+        <a routerLink="/register" class="btn secondary" style="width: 100%;">{{ 'CreateAccount' | translate }}</a>
       </div>
     </div>
   `,
@@ -67,6 +67,8 @@ import { LoginType } from '../core/models';
       width: 100%;
       max-width: 420px;
       padding: var(--spacing-2xl);
+      border-color: rgba(212, 163, 92, 0.3) !important;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 163, 92, 0.05) !important;
     }
 
     .login-card__header {
@@ -98,19 +100,33 @@ import { LoginType } from '../core/models';
       accent-color: var(--accent-primary);
     }
 
-    .password-field {
+    .toggle-hint { display: inline-flex; gap: 8px; align-items: center; }
+    .link-btn { background: none; border: none; padding: 0; color: var(--accent-primary); cursor: pointer; font-weight: 600; }
+
+    .password-input-wrapper {
       position: relative;
+      display: block;
+      width: 100%;
+    }
+
+    .password-input-wrapper input {
+      padding-inline-end: 44px !important;
+      width: 100%;
     }
 
     .password-field__toggle {
       position: absolute;
-      left: 16px;
+      inset-inline-end: 14px;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
       color: var(--text-muted);
       width: 20px;
       height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
     }
 
     .error-box {
@@ -148,13 +164,17 @@ export class LoginComponent {
   error = '';
   passwordVisible = false;
 
-  constructor(private api: ApiService, private auth: AuthService, private router: Router) {}
+  constructor(private api: ApiService, private auth: AuthService, private router: Router, private translate: TranslateService) {}
+
+  toggleLoginType() {
+    this.loginType = this.loginType === 'EMAIL' ? 'PHONE' : 'EMAIL';
+  }
 
   submit() {
-    this.error = ''; // Clear previous errors
+    this.error = '';
     this.api.login(this.loginType, this.identifier, this.password).subscribe({
       next: response => { this.auth.setSession(response); this.router.navigateByUrl(response.role === 'ADMIN' ? '/admin' : '/'); },
-      error: () => this.error = 'Invalid credentials. Please try again.'
+      error: () => this.error = this.translate.instant('InvalidCredentials')
     });
   }
 }

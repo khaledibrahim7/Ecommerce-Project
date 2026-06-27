@@ -3,45 +3,52 @@ import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ApiService } from '../core/api.service';
 import { Order } from '../core/models';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
-  imports: [DatePipe],
+  imports: [DatePipe, TranslatePipe],
   template: `
     @if (order(); as o) {
       <section class="page">
-        <div class="section-title"><h1>Order #{{ o.id }}</h1><span class="status-badge {{ o.status }}">{{ o.status }}</span></div>
+        <div class="section-title">
+          <h1>{{ 'Order' | translate }} #{{ o.id }}</h1>
+          <span class="status-badge {{ o.status }}">{{ o.status | translate }}</span>
+        </div>
         <div class="layout">
           <div class="card box">
-            <h2>Products</h2>
+            <h2>{{ 'Products' | translate }}</h2>
             @for (item of o.items; track item.productId) {
-              <div class="line"><span>{{ item.productName }} × {{ item.quantity }}</span><strong>{{ item.lineTotal }} EGP</strong></div>
+              <div class="line">
+                <span>{{ item.productName }} × {{ item.quantity }}</span>
+                <strong>{{ item.lineTotal }} {{ 'EGP' | translate }}</strong>
+              </div>
             }
-            <div class="line"><span>Shipping</span><strong>{{ o.shippingFee }} EGP</strong></div>
-            <div class="line total"><span>Total</span><strong>{{ o.total }} EGP</strong></div>
+            <div class="line"><span>{{ 'Shipping' | translate }}</span><strong>{{ o.shippingFee }} {{ 'EGP' | translate }}</strong></div>
+            <div class="line total"><span>{{ 'Total' | translate }}</span><strong>{{ o.total }} {{ 'EGP' | translate }}</strong></div>
           </div>
           <div class="card box">
-            <h2>Address & Payment</h2>
+            <h2>{{ 'Address & Payment' | translate }}</h2>
             <p>{{ o.address }}</p>
             <div style="margin-top: 12px; border-top: 1px solid #eadfca; padding-top: 12px; display: flex; flex-direction: column; gap: 6px;">
-              <p><strong>طريقة الدفع / Payment Method:</strong> {{ getPaymentMethodLabel(o.paymentMethod) }}</p>
+              <p><strong>{{ 'Payment Method' | translate }}:</strong> {{ getPaymentMethodLabel(o.paymentMethod) | translate }}</p>
               <p style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <strong>حالة الدفع / Payment Status:</strong>
+                <strong>{{ 'Payment Status' | translate }}:</strong>
                 <span class="status-badge" [class.PAID]="o.paid" [class.UNPAID]="!o.paid">
-                  {{ o.paid ? 'تم الدفع (Paid)' : 'لم يتم الدفع (Unpaid)' }}
+                  {{ (o.paid ? 'PAID' : 'UNPAID') | translate }}
                 </span>
                 @if (!o.paid && o.paymentMethod !== 'CASH') {
                   <button class="btn" (click)="retryPayment(o.id, o.paymentMethod)" [disabled]="loadingPayment" style="padding: 4px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); cursor: pointer; background: var(--accent-primary); border: none; color: var(--bg-base); font-weight: 700;">
-                    {{ loadingPayment ? 'جاري الاتصال...' : 'ادفع الآن / Pay Now' }}
+                    {{ loadingPayment ? ('Connecting...' | translate) : ('Pay Now' | translate) }}
                   </button>
                 }
               </p>
               @if (o.notes) {
-                <p style="margin-top: 4px;"><strong>ملاحظات / Notes:</strong> {{ o.notes }}</p>
+                <p style="margin-top: 4px;"><strong>{{ 'Notes' | translate }}:</strong> {{ o.notes }}</p>
               }
             </div>
-            <h2 style="margin-top: 16px;">History</h2>
+            <h2 style="margin-top: 16px;">{{ 'History' | translate }}</h2>
             @for (h of o.statusHistory; track h.createdAt) {
-              <p><strong>{{ h.status }}</strong> - {{ h.createdAt | date:'short' }}</p>
+              <p><strong>{{ h.status | translate }}</strong> - {{ h.createdAt | date:'short' }}</p>
             }
           </div>
         </div>
@@ -54,27 +61,34 @@ export class OrderDetailsComponent implements OnInit {
   order = signal<Order | null>(null);
   loadingPayment = false;
 
-  constructor(private route: ActivatedRoute, private api: ApiService) {}
-  ngOnInit() { this.api.order(Number(this.route.snapshot.paramMap.get('id'))).subscribe(o => this.order.set(o)); }
+  constructor(
+    private route: ActivatedRoute,
+    private api: ApiService,
+    public translate: TranslateService
+  ) {}
+
+  ngOnInit() {
+    this.api.order(Number(this.route.snapshot.paramMap.get('id'))).subscribe(o => this.order.set(o));
+  }
 
   getPaymentMethodLabel(method?: string | null): string {
-    if (!method) return 'الدفع عند الاستلام (Cash on Delivery)';
-    const labels: Record<string, string> = {
-      CASH: 'الدفع عند الاستلام (Cash on Delivery)',
-      VISA: 'بطاقة ائتمان (Visa / Card)',
-      WALLET: 'محفظة إلكترونية (Mobile Wallet)'
-    };
-    return labels[method.toUpperCase()] || method;
+    if (!method) return 'CASH_PAYMENT';
+    const key = method.toUpperCase();
+    if (key === 'CASH') return 'CASH_PAYMENT';
+    if (key === 'VISA') return 'VISA_PAYMENT';
+    if (key === 'WALLET') return 'WALLET_PAYMENT';
+    return key;
   }
 
   retryPayment(orderId: number, method?: string) {
     const activeMethod = method || 'CASH';
     let walletNumber: string | undefined = undefined;
     if (activeMethod.toUpperCase() === 'WALLET') {
-      const input = prompt('أدخل رقم هاتف المحفظة الإلكترونية (فودافون كاش / إلخ) / Wallet Phone Number:');
-      if (input === null) return; // User cancelled
+      const promptMsg = this.translate.instant('Wallet_Phone_Prompt');
+      const input = prompt(promptMsg);
+      if (input === null) return;
       if (!input.trim()) {
-        alert('رقم المحفظة مطلوب لإتمام الدفع.');
+        alert(this.translate.instant('Please enter the wallet phone number.'));
         return;
       }
       walletNumber = input.trim();
@@ -87,12 +101,12 @@ export class OrderDetailsComponent implements OnInit {
         if (payResponse.url) {
           window.location.href = payResponse.url;
         } else {
-          alert('Failed to generate payment URL.');
+          alert(this.translate.instant('Failed to generate payment URL.'));
         }
       },
       error: () => {
         this.loadingPayment = false;
-        alert('حدث خطأ أثناء الاتصال ببوابة الدفع.');
+        alert(this.translate.instant('An error occurred while connecting to the payment gateway.'));
       }
     });
   }

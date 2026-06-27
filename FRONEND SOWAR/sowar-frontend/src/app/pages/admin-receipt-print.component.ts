@@ -3,27 +3,28 @@ import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { ElectronicInvoice, Order } from '../core/models';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, TranslatePipe],
   template: `
     <section class="receipt-page">
       <div class="print-actions">
-        <a class="btn secondary" [routerLink]="['/admin/orders', order()?.id]">Back to Order</a>
-        <button class="btn" type="button" (click)="print()">Print Receipt</button>
+        <a class="btn secondary" [routerLink]="['/admin/orders', order()?.id]">{{ 'Back to Order' | translate }}</a>
+        <button class="btn" type="button" (click)="print()">{{ 'Print Receipt' | translate }}</button>
       </div>
 
       @if (order(); as o) {
         <article class="receipt">
           <header>
             <strong class="brand">Sowar</strong>
-            <span>Sales Receipt</span>
+            <span>{{ 'Sales Receipt' | translate }}</span>
             <small>{{ o.createdAt | date:'yyyy/MM/dd - hh:mm a' }}</small>
           </header>
 
           <div class="meta">
-            <div><span>Order ID</span><strong>#{{ o.id }}</strong></div>
-            <div><span>Invoice No.</span><strong>{{ invoice()?.invoiceNumber || ('SOWAR-' + o.id) }}</strong></div>
+            <div><span>{{ 'Order ID' | translate }}</span><strong>#{{ o.id }}</strong></div>
+            <div><span>{{ 'Invoice No.' | translate }}</span><strong>{{ invoice()?.invoiceNumber || ('SOWAR-' + o.id) }}</strong></div>
           </div>
 
           <div class="customer">
@@ -33,7 +34,7 @@ import { ElectronicInvoice, Order } from '../core/models';
           </div>
 
           <table>
-            <thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
+            <thead><tr><th>{{ 'Item' | translate }}</th><th>{{ 'Qty' | translate }}</th><th>{{ 'Price' | translate }}</th><th>{{ 'Total' | translate }}</th></tr></thead>
             <tbody>
               @for (item of o.items; track item.productId) {
                 <tr>
@@ -47,14 +48,14 @@ import { ElectronicInvoice, Order } from '../core/models';
           </table>
 
           <div class="totals">
-            <div><span>Subtotal</span><strong>{{ money(o.subtotal) }}</strong></div>
-            <div><span>Shipping</span><strong>{{ money(o.shippingFee) }}</strong></div>
-            <div class="grand"><span>Total</span><strong>{{ money(o.total) }}</strong></div>
+            <div><span>{{ 'Subtotal' | translate }}</span><strong>{{ money(o.subtotal) }}</strong></div>
+            <div><span>{{ 'Shipping' | translate }}</span><strong>{{ money(o.shippingFee) }}</strong></div>
+            <div class="grand"><span>{{ 'Total' | translate }}</span><strong>{{ money(o.total) }}</strong></div>
           </div>
 
           <footer>
-            <p>Payment: {{ getPaymentMethod(o.paymentMethod) }} - {{ o.paid ? 'PAID' : 'UNPAID' }}</p>
-            <p>Thank you for choosing Sowar</p>
+            <p>{{ 'Payment' | translate }}: {{ getPaymentMethod(o.paymentMethod) | translate }} - {{ (o.paid ? 'PAID' : 'UNPAID') | translate }}</p>
+            <p>{{ 'Thank you for choosing Sowar' | translate }}</p>
           </footer>
         </article>
       }
@@ -102,13 +103,12 @@ export class AdminReceiptPrintComponent implements OnInit {
   }
 
   getPaymentMethod(method?: string | null): string {
-    if (!method) return 'Cash on Delivery';
-    const labels: Record<string, string> = {
-      CASH: 'Cash on Delivery',
-      VISA: 'Credit Card',
-      WALLET: 'Mobile Wallet'
-    };
-    return labels[method.toUpperCase()] || method;
+    if (!method) return 'CASH_PAYMENT';
+    const clean = method.toUpperCase();
+    if (clean === 'CASH') return 'CASH_PAYMENT';
+    if (clean === 'VISA') return 'VISA_PAYMENT';
+    if (clean === 'WALLET') return 'WALLET_PAYMENT';
+    return method;
   }
 
   print() {

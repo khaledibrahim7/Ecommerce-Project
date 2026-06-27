@@ -1,11 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-welcome',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <div class="welcome-container">
+      <!-- Language Switcher in Welcome Page -->
+      <div class="welcome-lang-switcher-single">
+        @if (translate.currentLang() === 'ar' || !translate.currentLang()) {
+          <button type="button" class="lang-toggle-btn" (click)="switchLanguage('en')">EN</button>
+        } @else {
+          <button type="button" class="lang-toggle-btn" (click)="switchLanguage('ar')">AR</button>
+        }
+      </div>
+
       <!-- Floating Honey Droplets -->
       <div class="droplets">
         <div class="drop drop-1"></div>
@@ -18,7 +29,7 @@ import { RouterLink } from '@angular/router';
         <div class="brand-section">
           <h1 class="welcome-brand">SOWAR</h1>
           <div class="welcome-divider"></div>
-          <p class="welcome-subtitle">Pure Golden Nectar • رحيق الطبيعة الذهبي</p>
+          <p class="welcome-subtitle">{{ 'Pure Golden Nectar' | translate }}</p>
         </div>
         
         <div class="gallery-honeycomb">
@@ -31,14 +42,14 @@ import { RouterLink } from '@angular/router';
             <div class="hex-overlay"></div>
           </div>
           <div class="hexagon hex-3">
-            <img src="https://unsplash.com/photos/O0-v3a2sL9A/download" alt="Organic Honey">
+            <img src="/organic-honey.png" alt="Organic Honey">
             <div class="hex-overlay"></div>
           </div>
         </div>
 
         <div class="welcome-actions">
           <a routerLink="/home" class="enter-btn">
-            <span class="btn-text">ENTER STORE • دخول المتجر</span>
+            <span class="btn-text">{{ 'ENTER STORE' | translate }}</span>
             <div class="btn-liquid"></div>
           </a>
         </div>
@@ -59,6 +70,33 @@ import { RouterLink } from '@angular/router';
       justify-content: center;
       overflow: hidden;
       font-family: var(--font-body);
+    }
+
+    .welcome-lang-switcher-single {
+      position: absolute;
+      top: 30px;
+      inset-inline-end: 30px;
+      z-index: 100000;
+      display: inline-flex;
+    }
+    .lang-toggle-btn {
+      height: 38px;
+      padding: 0 16px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: 1px solid rgba(212, 163, 92, 0.3);
+      border-radius: 19px;
+      color: var(--accent-primary);
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .lang-toggle-btn:hover {
+      color: #0c0906;
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 15px rgba(212, 163, 92, 0.5);
+      transform: translateY(-2px);
     }
 
     /* 🍯 Floating Honey Droplets (Blur Blobs) */
@@ -268,4 +306,17 @@ import { RouterLink } from '@angular/router';
     }
   `]
 })
-export class WelcomeComponent {}
+export class WelcomeComponent {
+  constructor(
+    public translate: TranslateService,
+    @Inject(DOCUMENT) private document: any
+  ) {}
+
+  switchLanguage(language: string) {
+    this.translate.use(language);
+    localStorage.setItem('sowar_lang', language);
+    const dir = language === 'ar' ? 'rtl' : 'ltr';
+    this.document.documentElement.dir = dir;
+    this.document.documentElement.lang = language;
+  }
+}

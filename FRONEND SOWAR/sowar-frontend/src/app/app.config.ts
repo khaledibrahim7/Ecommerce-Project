@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
@@ -13,13 +13,10 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    // Provide ngx-translate using standalone providers (v18+). The http-loader helper
+    // returns provider(s) for TranslateLoader; we pass it to provideTranslateService as `loader`.
     provideTranslateService({
-      fallbackLang: 'ar',
-      lang: 'ar',
-      loader: provideTranslateHttpLoader({
-        prefix: './assets/i18n/',
-        suffix: '.json'
-      })
+      loader: provideTranslateHttpLoader({ prefix: './assets/i18n/', suffix: '.json' })
     })
   ]
 };

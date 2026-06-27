@@ -4,13 +4,14 @@ import { Router } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { Cart, ShippingGovernorate, UserProfile } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   template: `
     <div class="page fade-in">
       <div class="section-title">
-        <h1>Checkout</h1>
+        <h1>{{ 'Checkout' | translate }}</h1>
       </div>
 
       @if (cart(); as c) {
@@ -19,33 +20,33 @@ import { ToastService } from '../core/toast.service';
             @if (step() === 1) {
               <h2 class="panel-title">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28"><path d="M11.25 3.75A1.5 1.5 0 0 1 12.75 3h3A1.5 1.5 0 0 1 17.25 4.5v3a1.5 1.5 0 0 1-3 0V6h-1.5a1.5 1.5 0 0 1-1.5-1.5V3.75Z" /><path fill-rule="evenodd" d="M6 3.75A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25h12A2.25 2.25 0 0 0 20.25 18V9.75A2.25 2.25 0 0 0 18 7.5h-3.75a.75.75 0 0 1-.75-.75V3.75H6Zm4.5 9a.75.75 0 0 0 0 1.5h.008a.75.75 0 0 0 0-1.5h-.008ZM10.5 7.5a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-1.5 0V8.25a.75.75 0 0 1 .75-.75Zm1.5.75a.75.75 0 0 0-1.5 0v.008a.75.75 0 0 0 1.5 0V8.25Z" clip-rule="evenodd" /></svg>
-                <span>1. Shipping Address</span>
+                <span>{{ '1. Shipping Address' | translate }}</span>
               </h2>
 
               @if (isEditingAddress()) {
                 <!-- Edit Mode -->
                 @if(editableProfile(); as p) {
                   <div class="form-grid">
-                    <label>Full Name <input [(ngModel)]="p.fullName"></label>
-                    <label>Phone Number <input [(ngModel)]="p.phone"></label>
-                    <label>Governorate
+                    <label>{{ 'Full Name' | translate }} <input [(ngModel)]="p.fullName"></label>
+                    <label>{{ 'Phone Number' | translate }} <input [(ngModel)]="p.phone"></label>
+                    <label>{{ 'Governorate' | translate }}
                       <select [(ngModel)]="p.address.governorateId">
                         @for (gov of governorates(); track gov.id) { <option [ngValue]="gov.id">{{ gov.name }}</option> }
                       </select>
                     </label>
-                    <label>City <input [(ngModel)]="p.address.city"></label>
-                    <label class="full">Street <input [(ngModel)]="p.address.street"></label>
-                    <label>Area <input [(ngModel)]="p.address.area"></label>
-                    <label>Building Number <input [(ngModel)]="p.address.buildingNumber"></label>
-                    <label>Floor <input [(ngModel)]="p.address.floor"></label>
-                    <label>Apartment <input [(ngModel)]="p.address.apartment"></label>
-                    <label class="full">Landmark <input [(ngModel)]="p.address.landmark"></label>
+                    <label>{{ 'City' | translate }} <input [(ngModel)]="p.address.city"></label>
+                    <label class="full">{{ 'Street' | translate }} <input [(ngModel)]="p.address.street"></label>
+                    <label>{{ 'Area' | translate }} <input [(ngModel)]="p.address.area"></label>
+                    <label>{{ 'Building Number' | translate }} <input [(ngModel)]="p.address.buildingNumber"></label>
+                    <label>{{ 'Floor' | translate }} <input [(ngModel)]="p.address.floor"></label>
+                    <label>{{ 'Apartment' | translate }} <input [(ngModel)]="p.address.apartment"></label>
+                    <label class="full">{{ 'Landmark' | translate }} <input [(ngModel)]="p.address.landmark"></label>
                   </div>
                   <div class="action-buttons">
-                    <button class="btn ghost" (click)="toggleEditAddress()">Cancel</button>
+                    <button class="btn ghost" (click)="toggleEditAddress()">{{ 'Cancel' | translate }}</button>
                     <div style="display: flex; gap: var(--spacing-md);">
-                      <button class="btn secondary" (click)="saveAddress(false)">For this shipment only</button>
-                      <button class="btn" (click)="saveAddress(true)">Save and update my profile</button>
+                      <button class="btn secondary" (click)="saveAddress(false)">{{ 'For this shipment only' | translate }}</button>
+                      <button class="btn" (click)="saveAddress(true)">{{ 'Save and update my profile' | translate }}</button>
                     </div>
                   </div>
                 }
@@ -55,25 +56,25 @@ import { ToastService } from '../core/toast.service';
                   <div class="address-display">
                     <div class="address-display__header">
                       <strong>{{ p.fullName }}</strong>
-                      <button class="btn ghost" (click)="toggleEditAddress()" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button>
+                      <button class="btn ghost" (click)="toggleEditAddress()" style="padding: 4px 8px; font-size: 0.8rem;">{{ 'Edit' | translate }}</button>
                     </div>
                     <p>{{ addressText(p) }}</p>
                     <p class="muted">{{ p.phone }}</p>
                   </div>
                   <div>
-                    <label for="deliveryNotes">Delivery Notes (optional)</label>
-                    <textarea id="deliveryNotes" [(ngModel)]="deliveryNotes" placeholder="e.g., Call before arriving..."></textarea>
+                    <label for="deliveryNotes">{{ 'Delivery Notes (optional)' | translate }}</label>
+                    <textarea id="deliveryNotes" [(ngModel)]="deliveryNotes" [placeholder]="'e.g., Call before arriving...' | translate"></textarea>
                   </div>
-                  <button class="btn" (click)="goToNextStep()">Continue to Review & Payment</button>
+                  <button class="btn" (click)="goToNextStep()">{{ 'Continue to Review & Payment' | translate }}</button>
                 } @else {
-                  <p class="empty">Loading your data...</p>
+                  <p class="empty">{{ 'Loading your data...' | translate }}</p>
                 }
               }
             } @else {
               <!-- Step 2: Review & Payment -->
               <h2 class="panel-title">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28"><path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" /><path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" /></svg>
-                <span>2. Review & Payment</span>
+                <span>{{ '2. Review & Payment' | translate }}</span>
               </h2>
               <div class="review-items">
                 @for (item of c.items; track item.productId) {
@@ -81,7 +82,7 @@ import { ToastService } from '../core/toast.service';
                     <img [src]="imageUrl(item.imageUrl)" [alt]="item.productName">
                     <div class="review-item__info">
                       <span>{{ item.productName }}</span>
-                      <small>Quantity: {{ item.quantity }}</small>
+                      <small>{{ 'Quantity' | translate }}: {{ item.quantity }}</small>
                     </div>
                     <strong class="price">{{ money(item.lineTotal) }}</strong>
                   </div>
@@ -89,74 +90,74 @@ import { ToastService } from '../core/toast.service';
               </div>
               <!-- Luxury Payment Methods Selector -->
               <div class="payment-section">
-                <h3>طريقة الدفع / Payment Method</h3>
+                <h3>{{ 'Payment Method' | translate }}</h3>
                 <div class="payment-grid">
                   <button type="button" class="payment-option-card" [class.active]="selectedPaymentMethod() === 'CASH'" (click)="selectedPaymentMethod.set('CASH')">
                     <div class="option-icon">💵</div>
                     <div class="option-info">
-                      <strong>الدفع عند الاستلام (COD)</strong>
-                      <small>الدفع كاش عند استلام الأوردر.</small>
+                      <strong>{{ 'Cash on Delivery (COD)' | translate }}</strong>
+                      <small>{{ 'Pay in cash upon delivery.' | translate }}</small>
                     </div>
                   </button>
 
                   <button type="button" class="payment-option-card" [class.active]="selectedPaymentMethod() === 'VISA'" (click)="selectedPaymentMethod.set('VISA')">
                     <div class="option-icon">💳</div>
                     <div class="option-info">
-                      <strong>بطاقة ائتمان (Visa / Card)</strong>
-                      <small>الدفع أونلاين بالفيزا أو الماستركارد.</small>
+                      <strong>{{ 'Credit Card (Visa / Card)' | translate }}</strong>
+                      <small>{{ 'Pay online via Visa or MasterCard.' | translate }}</small>
                     </div>
                   </button>
 
                   <button type="button" class="payment-option-card" [class.active]="selectedPaymentMethod() === 'WALLET'" (click)="selectedPaymentMethod.set('WALLET')">
                     <div class="option-icon">📱</div>
                     <div class="option-info">
-                      <strong>محفظة إلكترونية (Wallet)</strong>
-                      <small>فودافون كاش أو إنستاباي.</small>
+                      <strong>{{ 'Mobile Wallet (Wallet)' | translate }}</strong>
+                      <small>{{ 'Vodafone Cash or Instapay.' | translate }}</small>
                     </div>
                   </button>
                 </div>
 
                 <div class="payment-method-details">
                   @if (selectedPaymentMethod() === 'CASH') {
-                    <p class="muted">📦 سيتم تأكيد الأوردر هاتفياً وشحنه فوراً والدفع نقداً عند الاستلام.</p>
+                    <p class="muted">📦 {{ 'COD_Instruction_Note' | translate }}</p>
                   }
                   @else if (selectedPaymentMethod() === 'VISA') {
                     <div class="payment-instruction mock-card-form">
-                      <label>رقم البطاقة / Card Number <input placeholder="4000 1234 5678 9010" disabled></label>
+                      <label>{{ 'Card Number' | translate }} <input placeholder="4000 1234 5678 9010" disabled></label>
                       <div class="half-inputs">
-                        <label>تاريخ الانتهاء / Expiry <input placeholder="MM / YY" disabled></label>
-                        <label>رمز الأمان / CVV <input placeholder="123" disabled></label>
+                        <label>{{ 'Expiry Date' | translate }} <input placeholder="MM / YY" disabled></label>
+                        <label>{{ 'CVV' | translate }} <input placeholder="123" disabled></label>
                       </div>
-                      <p class="mock-info-tag">⚠️ بوابة الدفع بالبطاقة حالياً قيد التجربة (Sandbox Mode).</p>
+                      <p class="mock-info-tag">⚠️ {{ 'Visa_Sandbox_Warning' | translate }}</p>
                     </div>
                   }
                   @else if (selectedPaymentMethod() === 'WALLET') {
                     <div class="payment-instruction wallet-details">
-                      <label>رقم المحفظة الإلكترونية (فودافون كاش / إلخ) / Wallet Phone Number
+                      <label>{{ 'Wallet Phone Number' | translate }}
                         <input [(ngModel)]="walletNumber" placeholder="01012345678" type="tel" style="width: 100%; box-sizing: border-box; margin-top: 6px;">
                       </label>
-                      <p class="muted" style="margin-top: 8px;">⚠️ سيتم توجيهك إلى صفحة تأكيد الدفع الخاصة بمحفظتك بعد النقر على الزر بالأسفل.</p>
+                      <p class="muted" style="margin-top: 8px;">⚠️ {{ 'Wallet_Redirect_Warning' | translate }}</p>
                     </div>
                   }
                 </div>
               </div>
               <div class="action-buttons">
-                <button class="btn secondary" (click)="step.set(1)">Back</button>
+                <button class="btn secondary" (click)="step.set(1)">{{ 'Back' | translate }}</button>
                 <button class="btn" [disabled]="placingOrder" (click)="placeOrder()">
-                  {{ placingOrder ? 'Placing Order...' : (selectedPaymentMethod() === 'CASH' ? 'Confirm Final Order' : 'Pay Now & Confirm') }}
+                  {{ placingOrder ? ('Placing Order...' | translate) : (selectedPaymentMethod() === 'CASH' ? ('Confirm Final Order' | translate) : ('Pay Now & Confirm' | translate)) }}
                 </button>
               </div>
             }
           </main>
           <aside class="summary-panel card">
-            <h2 class="panel-title">Order Summary</h2>
-            <div class="summary-line"><span>Subtotal</span><strong>{{ money(c.subtotal) }}</strong></div>
-            <div class="summary-line"><span>Shipping Fee</span><strong>{{ money(shippingFee()) }}</strong></div>
-            <div class="summary-line total"><span>Grand Total</span><strong>{{ money(grandTotal()) }}</strong></div>
+            <h2 class="panel-title">{{ 'Order Summary' | translate }}</h2>
+            <div class="summary-line"><span>{{ 'Subtotal' | translate }}</span><strong>{{ money(c.subtotal) }}</strong></div>
+            <div class="summary-line"><span>{{ 'Shipping Fee' | translate }}</span><strong>{{ money(shippingFee()) }}</strong></div>
+            <div class="summary-line total"><span>{{ 'Grand Total' | translate }}</span><strong>{{ money(grandTotal()) }}</strong></div>
           </aside>
         </div>
       } @else {
-        <p class="empty">Loading data...</p>
+        <p class="empty">{{ 'Loading data...' | translate }}</p>
       }
     </div>
   `,
@@ -183,7 +184,12 @@ export class CheckoutComponent implements OnInit {
 
   grandTotal = computed(() => (this.cart()?.subtotal || 0) + this.shippingFee());
 
-  constructor(private api: ApiService, private router: Router, private toast: ToastService) {}
+  constructor(
+    private api: ApiService,
+    private router: Router,
+    private toast: ToastService,
+    public translate: TranslateService
+  ) {}
 
   ngOnInit() {
     this.api.cart().subscribe(cart => {
@@ -206,17 +212,15 @@ export class CheckoutComponent implements OnInit {
     if (!editedProfile) return;
 
     if (updatePermanently) {
-      // Save to backend and update local state
       this.api.updateMe(editedProfile).subscribe(updatedProfile => {
         this.profile.set(updatedProfile);
-        this.toast.success('Your profile has been updated successfully');
+        this.toast.success(this.translate.instant('Your profile has been updated successfully'));
         this.isEditingAddress.set(false);
       });
     } else {
-      // Temporarily update the profile for this checkout session
       this.profile.set(editedProfile);
       this.isEditingAddress.set(false);
-      this.toast.info('Address updated for this shipment only');
+      this.toast.info(this.translate.instant('Address updated for this shipment only'));
     }
   }
 
@@ -227,11 +231,11 @@ export class CheckoutComponent implements OnInit {
   placeOrder() {
     if (this.placingOrder) return;
     const deliveryAddress = this.profile()?.address;
-    if (!deliveryAddress) return this.toast.error('No shipping address found.');
+    if (!deliveryAddress) return this.toast.error(this.translate.instant('No shipping address found.'));
 
     const method = this.selectedPaymentMethod();
     if (method === 'WALLET' && !this.walletNumber.trim()) {
-      return this.toast.error('يرجى إدخال رقم المحفظة الإلكترونية.');
+      return this.toast.error(this.translate.instant('Please enter the wallet phone number.'));
     }
 
     this.placingOrder = true;
@@ -241,25 +245,23 @@ export class CheckoutComponent implements OnInit {
         
         if (method === 'CASH') {
           this.placingOrder = false;
-          this.toast.success(response.message || 'Order confirmed successfully!');
+          this.toast.success(response.message || this.translate.instant('Order confirmed successfully!'));
           this.router.navigate(['/orders', orderId]);
         } else {
-          // VISA or WALLET payment redirection
-          this.toast.info('جاري الاتصال ببوابة Paymob، يرجى الانتظار...');
+          this.toast.info(this.translate.instant('Connecting to Paymob gateway, please wait...'));
           this.api.paymobPaymentUrl(orderId, method, this.walletNumber).subscribe({
             next: payResponse => {
               this.placingOrder = false;
               if (payResponse.url) {
-                // Redirect user to Paymob Accept
                 window.location.href = payResponse.url;
               } else {
-                this.toast.error('Failed to generate payment URL.');
+                this.toast.error(this.translate.instant('Failed to generate payment URL.'));
                 this.router.navigate(['/orders', orderId]);
               }
             },
             error: () => {
               this.placingOrder = false;
-              this.toast.error('حدث خطأ أثناء الاتصال ببوابة الدفع.');
+              this.toast.error(this.translate.instant('An error occurred while connecting to the payment gateway.'));
               this.router.navigate(['/orders', orderId]);
             }
           });
@@ -267,19 +269,19 @@ export class CheckoutComponent implements OnInit {
       },
       error: () => {
         this.placingOrder = false;
-        this.toast.error('An error occurred while placing the order.');
+        this.toast.error(this.translate.instant('An error occurred while placing the order.'));
       }
     });
   }
 
   addressText(profile: UserProfile | null) {
-    if (!profile?.address) return 'No address found';
+    if (!profile?.address) return this.translate.instant('No address found');
     const addr = profile.address;
     return [addr.governorateName, addr.city, addr.street, addr.buildingNumber, addr.floor, addr.apartment, addr.landmark].filter(Boolean).join(', ');
   }
 
   money(value?: number | null) {
-    return `${value || 0} EGP`;
+    return `${value || 0} ${this.translate.instant('EGP')}`;
   }
 
   imageUrl(url: string | null | undefined): string {
