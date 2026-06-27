@@ -5,18 +5,19 @@ import { AuthService } from '../core/auth.service';
 import { Product } from '../core/models';
 import { ToastService } from '../core/toast.service';
 import { ProductCardComponent } from '../shared/product-card.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
-  imports: [RouterLink, ProductCardComponent],
+  imports: [RouterLink, ProductCardComponent, TranslatePipe],
   template: `
     <section class="hero" style="background-image: linear-gradient(to right, rgba(12, 9, 6, 0.2) 0%, rgba(12, 9, 6, 0.7) 100%), url('/user-honey.jpg'); background-size: cover; background-position: center;">
       <div class="hero-content">
-        <h1>Sowar Natural Honey</h1>
-        <p>Discover the purity of nature in every spoonful. Our authentic honey products offer a unique experience of quality and unforgettable taste.</p>
+        <h1>{{ 'Sowar Natural Honey' | translate }}</h1>
+        <p>{{ 'Discover the purity of nature in every spoonful. Our authentic honey products offer a unique experience of quality and unforgettable taste.' | translate }}</p>
         <div class="hero-actions">
-          <a routerLink="/products" class="btn btn-primary">Shop Now</a>
+          <a routerLink="/products" class="btn btn-primary">{{ 'Shop Now' | translate }}</a>
           @if (!isLoggedIn) {
-            <a routerLink="/register" class="btn btn-secondary">Create Account</a>
+            <a routerLink="/register" class="btn btn-secondary">{{ 'Create Account' | translate }}</a>
           }
         </div>
       </div>
@@ -24,8 +25,8 @@ import { ProductCardComponent } from '../shared/product-card.component';
 
     <section class="page featured-products">
       <div class="section-header">
-        <h2>Featured Products</h2>
-        <a routerLink="/products" class="view-all-link">View All</a>
+        <h2>{{ 'Featured Products' | translate }}</h2>
+        <a routerLink="/products" class="view-all-link">{{ 'View All' | translate }}</a>
       </div>
       <div class="grid">
         @for (product of products(); track product.id) {
@@ -164,7 +165,13 @@ export class HomeComponent implements OnInit {
   products = signal<Product[]>([]);
   isLoggedIn = false;
 
-  constructor(private api: ApiService, private auth: AuthService, private router: Router, private toast: ToastService) {
+  constructor(
+    private api: ApiService,
+    private auth: AuthService,
+    private router: Router,
+    private toast: ToastService,
+    private translate: TranslateService
+  ) {
     this.isLoggedIn = this.auth.isLoggedIn();
   }
 
@@ -173,12 +180,22 @@ export class HomeComponent implements OnInit {
   }
 
   addToCart(product: Product) {
-    if (!this.auth.isLoggedIn()) return this.router.navigate(['/login']);
-    return this.api.saveCartItem(product.id, 1).subscribe(() => this.toast.success('Product added to cart'));
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.translate.get('Product added to cart').subscribe((res: string) => {
+      this.api.saveCartItem(product.id, 1).subscribe(() => this.toast.success(res));
+    });
   }
 
   addWishlist(product: Product) {
-    if (!this.auth.isLoggedIn()) return this.router.navigate(['/login']);
-    return this.api.addWishlist(product.id).subscribe(() => this.toast.success('Product added to wishlist'));
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.translate.get('Product added to wishlist').subscribe((res: string) => {
+      this.api.addWishlist(product.id).subscribe(() => this.toast.success(res));
+    });
   }
 }

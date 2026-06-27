@@ -106,7 +106,7 @@ import { ToastService } from '../core/toast.service';
         <div class="product-grid">
           @for (product of products(); track product.id) {
             <div class="product-card">
-              <img [src]="imageUrl(product.imageUrls?.[0] || '')" alt="{{ product.name }}" class="product-image">
+              <img [src]="imageUrl(product.imageUrls[0] || '')" alt="{{ product.name }}" class="product-image">
               <div class="product-info">
                 <h3>{{ product.name }}</h3>
                 <p>{{ product.categoryName || '-' }}</p>

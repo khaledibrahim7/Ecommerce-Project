@@ -751,3 +751,42 @@ nav a {
 .contact-list .platform-phone { background: #0088cc; }
 .contact-list .platform-link { background: var(--accent-primary); color: var(--bg-base); }
 
+/* --- Language Switcher Pill --- */
+.language-switcher {
+  display: inline-flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 2px;
+  margin-left: 8px;
+  direction: ltr;
+
+  button {
+    width: auto !important;
+    height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 16px !important;
+    color: var(--text-secondary) !important;
+    background: transparent !important;
+    transition: all var(--transition-fast) !important;
+    box-shadow: none !important;
+    transform: none !important;
+
+    &:hover {
+      color: var(--text-primary) !important;
+      background: rgba(212, 163, 92, 0.1) !important;
+    }
+
+    &.active {
+      background: var(--accent-primary) !important;
+      color: var(--bg-base) !important;
+      box-shadow: var(--shadow-sm) !important;
+    }
+  }
+}
+
+

@@ -19,15 +19,15 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       </div>
 
       <div class="tabs" role="tablist">
-        <button class="btn secondary" [class.active]="tab === 'contact'" (click)="tab='contact'">Contact</button>
-        <button class="btn secondary" [class.active]="tab === 'invoices'" (click)="tab='invoices'">Invoices</button>
         <button class="btn secondary" [class.active]="tab === 'overview'" (click)="tab='overview'">Overview</button>
         <a class="btn secondary" routerLink="/admin/products">Products</a>
         <button class="btn secondary" [class.active]="tab === 'orders'" (click)="tab='orders'">Orders</button>
+        <button class="btn secondary" [class.active]="tab === 'invoices'" (click)="tab='invoices'">Invoices</button>
+        <button class="btn secondary" [class.active]="tab === 'finance'" (click)="tab='finance'">Expenses</button>
+        <button class="btn secondary" [class.active]="tab === 'settings'" (click)="tab='settings'">Categories & Shipping</button>
         <button class="btn secondary" [class.active]="tab === 'questions'" (click)="tab='questions'">Questions</button>
         <button class="btn secondary" [class.active]="tab === 'reviews'" (click)="tab='reviews'">Reviews</button>
-        <button class="btn secondary" [class.active]="tab === 'settings'" (click)="tab='settings'">Categories & Shipping</button>
-        <button class="btn secondary" [class.active]="tab === 'finance'" (click)="tab='finance'">Expenses</button>
+        <button class="btn secondary" [class.active]="tab === 'contact'" (click)="tab='contact'">Contact</button>
       </div>
 
       @if (tab === 'overview') {
@@ -83,10 +83,8 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
               <option value="TIKTOK">TikTok</option>
               <option value="EMAIL">Email</option>
               <option value="PHONE">Phone</option>
-              <option value="LINK">Other Link</option>
             </select>
             <input [(ngModel)]="contactForm.value" placeholder="Link, phone, or email">
-            <input type="number" [(ngModel)]="contactForm.sortOrder" placeholder="Sort">
             <button class="btn" (click)="saveContact()">Save</button>
           </div>
           @for (link of contactLinks(); track link.id) {
@@ -206,19 +204,9 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       @if (tab === 'finance') {
         <section class="card panel">
           <h2>Expenses</h2>
-          <div class="metric-grid compact">
-            <div class="card metric tone-orders"><span>Total Orders</span><strong>{{ totalOrders(report()) }}</strong></div>
-            <div class="card metric tone-active"><span>Active Orders</span><strong>{{ activeOrders(report()) }}</strong></div>
-            <div class="card metric tone-cancelled"><span>Cancelled Orders</span><strong>{{ report()?.cancelledOrdersCount || 0 }}</strong></div>
-            <div class="card metric tone-expense"><span>Total Expenses</span><strong>{{ money(report()?.expenses) }}</strong></div>
-            <div class="card metric tone-sales"><span>Gross Profit</span><strong>{{ money(report()?.grossProfit) }}</strong></div>
-            <div class="card metric tone-profit"><span>Monthly Net Profit</span><strong>{{ money(report()?.netProfit) }}</strong><small>{{ profitFormula(report()) }}</small></div>
-            <div class="card metric tone-profit-year"><span>Yearly Net Profit</span><strong>{{ money(yearlyReport()?.netProfit) }}</strong></div>
-          </div>
           <div class="inline-form">
             <input [(ngModel)]="expenseForm.title" placeholder="Title">
             <input type="number" [(ngModel)]="expenseForm.amount" placeholder="Amount">
-            <input type="date" [(ngModel)]="expenseForm.expenseDate">
             <button class="btn" (click)="saveExpense()">Save</button>
           </div>
           @for (expense of expenses(); track expense.id) {
@@ -231,6 +219,19 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
             </div>
           }
         </section>
+      }
+
+      @if (confirmDialog(); as dialog) {
+        <div class="modal-backdrop">
+          <div class="modal-card">
+            <h3>{{ dialog.title }}</h3>
+            <p>{{ dialog.message }}</p>
+            <div class="modal-actions">
+              <button class="btn secondary" (click)="confirmDialog.set(null)">Cancel</button>
+              <button class="btn danger" (click)="dialog.action(); confirmDialog.set(null)">Confirm</button>
+            </div>
+          </div>
+        </div>
       }
     </section>
   `,
@@ -284,7 +285,7 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
       background: var(--accent-primary);
       box-shadow: 0 4px 12px var(--shadow-glow);
     }
-    .metric-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); align-items: stretch; gap: 14px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); align-items: stretch; gap: 14px; }
     .metric {
       position: relative;
       min-height: 124px;
@@ -387,6 +388,47 @@ type AdminTab = 'overview' | 'orders' | 'invoices' | 'questions' | 'reviews' | '
     }
 
     @media(max-width: 980px){ .layout,.inline-form,.question-row { grid-template-columns: 1fr; } }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      display: grid;
+      place-items: center;
+      z-index: 1100;
+    }
+    .modal-card {
+      width: min(420px, calc(100% - 32px));
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-xl);
+      text-align: center;
+      animation: modalFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .modal-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      font-family: var(--font-title);
+    }
+    .modal-card p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
@@ -408,8 +450,13 @@ export class AdminDashboardComponent implements OnInit {
   governorateForm: Partial<ShippingGovernorate> = { active: true };
   expenseForm: Partial<Expense> = { expenseDate: new Date().toISOString().slice(0, 10) };
   contactForm: Partial<ContactLink> = { platform: 'WHATSAPP', sortOrder: 0 };
+  confirmDialog = signal<{ title: string; message: string; action: () => void } | null>(null);
 
   constructor(private api: ApiService, private toast: ToastService) {}
+
+  confirm(title: string, message: string, action: () => void) {
+    this.confirmDialog.set({ title, message, action });
+  }
 
   ngOnInit() {
     this.load();
@@ -477,12 +524,12 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   deleteProduct(id: number) {
-    if (confirm('Disable product?')) {
+    this.confirm('Disable Product', 'Are you sure you want to disable this product?', () => {
       this.api.deleteProduct(id).subscribe(() => {
         this.toast.success('Product disabled');
         this.load();
       });
-    }
+    });
   }
 
   updateStatus(order: Order, status: string, note?: string) {
@@ -503,12 +550,12 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   deleteReview(id: number) {
-    if (confirm('Delete review?')) {
+    this.confirm('Delete Review', 'Are you sure you want to delete this review?', () => {
       this.api.deleteReview(id).subscribe(() => {
         this.toast.success('Review deleted');
         this.load();
       });
-    }
+    });
   }
 
   editCategory(category: Category) { this.categoryForm = { ...category }; }
@@ -520,7 +567,14 @@ export class AdminDashboardComponent implements OnInit {
       this.load();
     });
   }
-  deleteCategory(id: number) { if (confirm('Delete category?')) this.api.deleteCategory(id).subscribe(() => this.load()); }
+  deleteCategory(id: number) {
+    this.confirm('Delete Category', 'Are you sure you want to delete this category?', () => {
+      this.api.deleteCategory(id).subscribe(() => {
+        this.toast.success('Category deleted');
+        this.load();
+      });
+    });
+  }
 
   editGovernorate(governorate: ShippingGovernorate) { this.governorateForm = { ...governorate }; }
   saveGovernorate() {
@@ -530,7 +584,14 @@ export class AdminDashboardComponent implements OnInit {
       this.load();
     });
   }
-  deleteGovernorate(id: number) { if (confirm('Delete governorate?')) this.api.deleteGovernorate(id).subscribe(() => this.load()); }
+  deleteGovernorate(id: number) {
+    this.confirm('Delete Governorate', 'Are you sure you want to delete this shipping governorate?', () => {
+      this.api.deleteGovernorate(id).subscribe(() => {
+        this.toast.success('Governorate deleted');
+        this.load();
+      });
+    });
+  }
 
   editExpense(expense: Expense) { this.expenseForm = { ...expense }; }
   saveExpense() {
@@ -542,12 +603,13 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
   deleteExpense(id: number) {
-    if (confirm('Delete expense?')) {
+    this.confirm('Delete Expense', 'Are you sure you want to delete this expense?', () => {
       this.api.deleteExpense(id).subscribe(() => {
+        this.toast.success('Expense deleted');
         this.load();
         this.refreshReports();
       });
-    }
+    });
   }
 
   editContact(link: ContactLink) { this.contactForm = { ...link }; }
@@ -581,9 +643,12 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   deleteContact(id: number) {
-    if (confirm('Delete contact link?')) {
-      this.api.deleteContactLink(id).subscribe(() => this.load());
-    }
+    this.confirm('Delete Contact Link', 'Are you sure you want to delete this contact link?', () => {
+      this.api.deleteContactLink(id).subscribe(() => {
+        this.toast.success('Contact link deleted');
+        this.load();
+      });
+    });
   }
 
   resetProduct() {

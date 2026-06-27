@@ -9,6 +9,7 @@ const API_URL = 'http://localhost:8080/api';
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   cartUpdated$ = new Subject<void>();
+  contactLinksUpdated$ = new Subject<void>();
 
   constructor(private http: HttpClient) {}
 
@@ -231,13 +232,16 @@ export class ApiService {
   }
 
   saveContactLink(link: Partial<ContactLink>) {
-    return link.id
+    const req = link.id
       ? this.http.put<ContactLink>(`${API_URL}/admin/contact-links/${link.id}`, link)
       : this.http.post<ContactLink>(`${API_URL}/admin/contact-links`, link);
+    return req.pipe(tap(() => this.contactLinksUpdated$.next()));
   }
 
   deleteContactLink(id: number) {
-    return this.http.delete<void>(`${API_URL}/admin/contact-links/${id}`);
+    return this.http.delete<void>(`${API_URL}/admin/contact-links/${id}`).pipe(
+      tap(() => this.contactLinksUpdated$.next())
+    );
   }
 
   uploadImage(file: File) {

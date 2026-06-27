@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, Inject, effect } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NgIf, DOCUMENT } from '@angular/common';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ApiService } from './core/api.service';
 import { AuthService } from './core/auth.service';
 import { AppNotification, ContactLink } from './core/models';
@@ -8,7 +9,7 @@ import { ToastService } from './core/toast.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIf],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIf, TranslatePipe],
   template: `
     @if (!isWelcomePage()) {
       <header class="topbar">
@@ -35,6 +36,11 @@ import { ToastService } from './core/toast.service';
         </nav>
 
         <div class="actions">
+          <!-- Language Switcher -->
+          <div class="language-switcher">
+            <button type="button" [class.active]="translate.currentLang() === 'en'" (click)="switchLanguage('en')">EN</button>
+            <button type="button" [class.active]="translate.currentLang() === 'ar' || !translate.currentLang()" (click)="switchLanguage('ar')">AR</button>
+          </div>
           <!-- Theme Toggle Button -->
           <button class="theme-toggle" type="button" (click)="toggleTheme()" aria-label="Toggle Theme">
             @if (isDarkMode()) {
@@ -108,7 +114,7 @@ import { ToastService } from './core/toast.service';
     <div class="mega-nav" [class.open]="navOpen()" [class.closed]="!navOpen()">
       <div class="mega-inner">
         <button class="close-btn" type="button" (click)="toggleNav()">×</button>
-        
+
         <h3>Menu</h3>
         <nav class="menu-list">
           @if (auth.isAdmin() && !isPreview()) {
@@ -236,8 +242,14 @@ export class AppComponent implements OnInit {
     public toast: ToastService,
     private router: Router,
     private api: ApiService,
+    public translate: TranslateService,
     @Inject(DOCUMENT) private document: any
   ) {
+    this.translate.addLangs(['en', 'ar']);
+    const savedLang = localStorage.getItem('sowar_lang') || 'ar';
+    this.translate.use(savedLang);
+    this.document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
+    this.document.documentElement.lang = savedLang;
     // React to auth status changes (login/logout)
     effect(() => {
       const user = this.auth.user();
@@ -265,6 +277,11 @@ export class AppComponent implements OnInit {
       this.loadCart();
     });
 
+    // Subscribe to contact links updates
+    this.api.contactLinksUpdated$.subscribe(() => {
+      this.api.contactLinks().subscribe(list => this.contactLinks.set(list || []));
+    });
+
     setInterval(() => this.loadNotifications(), 30000);
     setInterval(() => this.loadCart(), 30000);
     // load categories for mega nav
@@ -274,6 +291,14 @@ export class AppComponent implements OnInit {
 
   updateWelcomeStatus() {
     this.isWelcomePage.set(this.router.url === '/' || this.router.url === '');
+  }
+
+  switchLanguage(language: string) {
+    this.translate.use(language);
+    localStorage.setItem('sowar_lang', language);
+    const dir = language === 'ar' ? 'rtl' : 'ltr';
+    this.document.documentElement.dir = dir;
+    this.document.documentElement.lang = language;
   }
 
   toggleTheme() {
@@ -286,12 +311,9 @@ export class AppComponent implements OnInit {
   }
 
   applyTheme() {
-    const isUrlAdmin = this.router.url.startsWith('/admin');
     const body = this.document.body;
     body.classList.remove('dark-theme', 'admin-theme');
-    if (isUrlAdmin) {
-      body.classList.add('admin-theme');
-    } else if (this.isDarkMode()) {
+    if (this.isDarkMode()) {
       body.classList.add('dark-theme');
     }
   }
